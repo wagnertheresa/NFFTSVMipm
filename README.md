@@ -10,13 +10,13 @@ This package uses the [FastAdjacency](https://github.com/dominikbuenger/FastAdja
 - This software depends on Bünger's FastAdjacency Package. We refer to https://github.com/dominikbuenger/FastAdjacency#readme for installation instructions.
 
 # Usage
-The main file class_SVMipm.py consists of the following two classes:
-- `SVMipm` performs a preconditioned interior point method for Support Vector Machines.
+The main file class_NFFTSVMipm.py consists of the following two classes:
+- `NFFTSVMipm` performs a preconditioned interior point method for Support Vector Machines.
 - `RandomSearch` searches on random candidate parameter values for one of the classifiers `NFFTSVMipm` or `LIBSVM`.
 
-It can be run via the file run_SVMipm.py.
+It can be run via the file run_NFFTSVMipm.py.
 
-See __ for an example.
+See [run_NFFTSVMipm.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/run_NFFTSVMipm.py) for an example.
 
 # Datasets
 All benchmark datasets used in the numerical results section can be found in the data folder of this repository.
