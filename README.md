@@ -21,8 +21,6 @@ See [run_NFFTSVMipm.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/ru
 # Datasets
 All benchmark datasets used in the numerical results section can be found in the data folder of this repository.
 
-# Citation
-
 # References
 We refer to our previous repository [NFFT4ANOVA](https://github.com/wagnertheresa/NFFT4ANOVA), where this fast NFFT-based matrix--vector product approach is applied to kernel ridge regression.
 
