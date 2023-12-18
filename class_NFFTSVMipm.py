@@ -10,7 +10,7 @@ from libsvm import svmutil
 
 # import auxiliary functions
 from svm_ipm import svm_ipm
-from Precond_with_CG import pivoted_chol_rp
+from precond import pivoted_chol_rp
 from svm_predict_fastsum import svm_predict_fastsum
 from data_preprocessing import data_preprocess
 

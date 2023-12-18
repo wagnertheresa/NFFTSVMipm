@@ -5,7 +5,7 @@ import warnings
 
 from kernel_matvec import kernel_matvec
 from hessian_ipm import hessian_ipm
-from Precond_with_CG import SMW_prec
+from precond import SMW_prec
 
 def svm_ipm(KER, y, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Ldec=[]):
     """
@@ -32,7 +32,7 @@ def svm_ipm(KER, y, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Ldec=[]):
     prec : str
         The preconditioner that shall be used for the GMRES within the IPM.
     Ldec : ndarray, default=[]
-        The low-rank decomposition for the preconditioner.
+        The low-rank decomposition matrix for the preconditioner.
         
     Returns
     -------
@@ -102,8 +102,7 @@ def svm_ipm(KER, y, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Ldec=[]):
         bb = Ldec.conj().T @ (dinv@Ldec)
         aa = np.eye(Ldec.shape[1])
         test = aa+bb
-        p1, l1, u1  = scipy.linalg.lu(aa + bb)
-        PCx= lambda x : SMW_prec(x, n, Ldec, p1, l1, u1,  y, dhm, test)
+        PCx= lambda x : SMW_prec(x, n, Ldec, y, dhm, test)
         M = LinearOperator((n+1,n+1), PCx)
             
         [dx,flag] = scipy.sparse.linalg.gmres(A=A, b=rhs, tol=Gtol, restart=Gmaxiter, maxiter=1, M=M, callback=callback_gmres, callback_type='pr_norm')        
