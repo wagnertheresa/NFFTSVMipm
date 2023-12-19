@@ -280,7 +280,7 @@ class RandomSearch:
     ----------
     classifier : str, default="NFFTSVMipm"
         The classifier parameter determines, for which classifier RandomSearch shall be performed.
-        It is either "NFTTSVMipm" or "LIBSV;".
+        It is either "NFTTSVMipm" or "LIBSVM".
     lb : list
         List of lower bounds for the parameters sigma/gamma and C.
     ub : list
@@ -300,11 +300,11 @@ class RandomSearch:
         If weight_scheme="no weights", all weights are 1.
     sigma_br : float, default=0.6
         Barrier reduction parameter used in the IPM.
-    D_prec : int, default=50
+    D_prec : int, default=200
         Rank of the low-rank decomposition based preconditioner for the IPM.
-    prec : str, default="chol"
+    prec : str, default="chol_greedy"
         The preconditioner that shall be used in the IPM.
-    iter_ip : int, default=25
+    iter_ip : int, default=50
         Maximum number of interior point iterations.
     scoring : str, default="accuracy"
         The scoring parameter determines, which evaluation metric shall be used for measuring the prediction quality.
@@ -334,7 +334,7 @@ class RandomSearch:
 
     """
     
-    def __init__(self, classifier, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", weight_scheme="no weights", sigma_br=0.6, D_prec=50, prec="chol", iter_ip=25, scoring="accuracy"):
+    def __init__(self, classifier, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", weight_scheme="no weights", sigma_br=0.6, D_prec=200, prec="chol_greedy", iter_ip=50, scoring="accuracy"):
         
         self.classifier = classifier
         self.lb = lb
@@ -675,11 +675,11 @@ class RandomSearch:
         mean_total_time_pred : float
             Mean value over the prediction times of all candidate parameters.
         (D_prec : int
-            Rank of the low-rank decomposition based preconditioner for the IPM.)
+            Rank of the low-rank decomposition based preconditioner for the IPM.
         best_GMRESiter : list
             Number of GMRES iterations at each IPM step for the run yielding the best prediction quality.
         mean_GMRESiter : list
-            List of the mean number of GMRES iterations at each IPM step for all runs.
+            List of the mean number of GMRES iterations at each IPM step for all runs.)
         
         """
         total_time_fit = []
