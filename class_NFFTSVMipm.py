@@ -170,14 +170,14 @@ class NFFTSVMipm:
             ## GREEDY-BASED PIVOTED CHOLESKY APPROACH      
             MM = self.D_prec
             n = len(y_train)
-            Ldec = pivoted_chol_rp(MM,KER_fast,n,"greedy",1e-5)
+            Ldec = pivoted_chol_rp(MM,KER_fast,n,"greedy")
                 
         ########################
         elif prec == "chol_rp":
             ## RANDOMIZED PIVOTED CHOLESKY APPROACH
             MM = self.D_prec
             n = len(y_train)
-            Ldec = pivoted_chol_rp(MM,KER_fast,n,"rp",1e-5)
+            Ldec = pivoted_chol_rp(MM,KER_fast,n,"rp")
             
         ######################
         # preconditioning with random fourier features
