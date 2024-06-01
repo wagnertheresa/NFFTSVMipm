@@ -235,8 +235,8 @@ class NFFTSVMipm:
        
         ########################
 
-        [alpha_fast, GMRESiter_fast] = svm_ipm(KER_fast,y_train,self.C,iter_ip,1e-1,self.sigma_br,100,1e-3,prec,Ldec)
-        # [alpha_fast, GMRESiter_fast] = svm_ipm_pd(KER_fast,y_train,self.C,50,1e-2,self.sigma_br,100,1e-3,prec,Ldec)
+        #[alpha_fast, GMRESiter_fast] = svm_ipm(KER_fast,y_train,self.C,iter_ip,1e-1,self.sigma_br,100,1e-3,prec,Ldec)
+        [alpha_fast, GMRESiter_fast] = svm_ipm_pd(KER_fast,y_train,self.C,50,1e-2,self.sigma_br,100,1e-3,prec,Ldec)
 
         print("GMRES-iterations in Fastsum:", GMRESiter_fast)
         

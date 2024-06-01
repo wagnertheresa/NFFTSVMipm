@@ -10,8 +10,8 @@ from class_NFFTSVMipm import RandomSearch
 n = 500 
 
 #data = "higgs"
-data = "susy"
-#data = "cod_rna"
+#data = "susy"
+data = "cod_rna"
 ####################
  
 if data == "higgs":

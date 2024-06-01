@@ -73,9 +73,9 @@ def z_score_normalization(Xtrain, Xtest):
     
     # fit scaler only on train data to prevent train-test contamination
     scaler = StandardScaler()
-    X_fit = scaler.fit(Xtrain)
-    X_train = X_fit.transform(Xtrain)
-    X_test = X_fit.transform(Xtest)
+    X_fit = scaler.fit(np.asarray(Xtrain))
+    X_train = X_fit.transform(np.asarray(Xtrain))
+    X_test = X_fit.transform(np.asarray(Xtest))
     
 # =============================================================================
 #     # scale data into [0,1] via the transformation x -> 0.5*(1+erf(x/sqrt(2)))

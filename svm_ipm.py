@@ -246,6 +246,10 @@ def svm_ipm_pd(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Lde
     # Compute initial infeasibilities, norms & primal/dual tolerances required
     xid = 1 - MAT(alpha) + lambda_svm * ytrain + mu*1/alpha-mu*1/(C-alpha) # Right hand side first component
     xip = alpha.conj().T @ ytrain # Right hand side second component
+
+    xid0 = xid
+    xip0 = xip
+
     nrmxid = np.linalg.norm(xid)
     dtol = tol * (1 + np.sqrt(n)) # 1+||c|| in 25 years paper
     nrmxip = np.linalg.norm(xip)
@@ -334,14 +338,14 @@ def svm_ipm_pd(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Lde
         nrmxip = np.linalg.norm(xip)
         nrmxid = np.linalg.norm(xid)
         print("norm of stopping mu:",mu)
-        print("Norm of the xip:", nrmxip, "norm of xid:", nrmxid)
+        print("Norm of the xip:", nrmxip, "norm of xid:", nrmxid/np.linalg.norm(xid0))
         ########################################################################
         # STOPPING CRITERION when bad convergence in IPM
         ########################################################################
 
         # Warning if IPM has not converged; plot GMRES iterations at each IPM step
-        if (mu > tol or nrmxip > ptol or nrmxid > dtol):
-            warnings.warn("IPM has not converged")
-            print("\nIPM has not converged!\n")
+        if (mu < tol or nrmxid < dtol):
+            print("\nIPM has converged!\n")
+            break
 
     return [alpha, GMRESiter]
