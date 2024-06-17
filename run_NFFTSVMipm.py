@@ -7,7 +7,7 @@ from class_NFFTSVMipm import RandomSearch
 
 # number of train and test data each
 
-n = 500 
+n = 50000
 
 #data = "higgs"
 #data = "susy"

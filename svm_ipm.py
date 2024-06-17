@@ -235,9 +235,9 @@ def svm_ipm_pd(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Lde
 
 
     # Initialize barrier parameter mu and dual variable lambda_svm
-    mu = 1.0
+    mu = (eta.T@alpha+eta.T@(C-alpha))/(2*n)
     mu_vec = [mu]
-    lambda_svm = 0
+    # lambda_svm = 0
 
     # Specify function for matrix-vector product YKY
     MAT = lambda x: kernel_matvec(x, KER, ytrain)
@@ -250,6 +250,7 @@ def svm_ipm_pd(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Lde
     xid0 = xid
     xip0 = xip
 
+    print((eta.T@alpha+eta.T@(C-alpha))/(2*n))
     nrmxid = np.linalg.norm(xid)
     dtol = tol * (1 + np.sqrt(n)) # 1+||c|| in 25 years paper
     nrmxip = np.linalg.norm(xip)
@@ -302,7 +303,7 @@ def svm_ipm_pd(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Lde
         dalpha = dx[:-1]
         dlambda = dx[-1]
         deta = mu/alpha-eta-eta/alpha*dalpha
-        dxi = mu*1/(C-alpha)-xi+1/(C-alpha)*xi*dalpha
+        dxi = mu/(C-alpha)-xi+xi/(C-alpha)*dalpha
 
 
         # Update alpha and lambda
@@ -322,29 +323,27 @@ def svm_ipm_pd(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Lde
         # Update barrier parameter mu
         mu = sigma_br * mu
 
+        # r_dual = MAT(alpha)-1-u +v + self.y*landa
+
         # Set lower bound for mu to avoid getting too close to zero barrier
         if (mu < tol/10):
             mu = tol/10
         mu_vec.append(mu)
 
         # Compute infeasibilities and norms
-        # xid = 1 - MAT(alpha) + lambda_svm * ytrain + mu * (C - 2*alpha)/(alpha*(C-alpha))
-        # nrmxid = np.linalg.norm(xid)
-        # xip = alpha.conj().T @ ytrain
-        # nrmxip = np.linalg.norm(xip)
-
         xid = 1 - MAT(alpha) + lambda_svm * ytrain + mu*1/alpha-mu*1/(C-alpha) # Right hand side first component
         xip = alpha.conj().T @ ytrain # Right hand side second component
         nrmxip = np.linalg.norm(xip)
         nrmxid = np.linalg.norm(xid)
         print("norm of stopping mu:",mu)
-        print("Norm of the xip:", nrmxip, "norm of xid:", nrmxid/np.linalg.norm(xid0))
+        print("Norm of the xip:", nrmxip, "norm of xid:", nrmxid)
         ########################################################################
         # STOPPING CRITERION when bad convergence in IPM
         ########################################################################
 
         # Warning if IPM has not converged; plot GMRES iterations at each IPM step
-        if (mu < tol or nrmxid < dtol):
+#        if (mu < tol or nrmxid < dtol):
+        if (nrmxid < dtol):
             print("\nIPM has converged!\n")
             break
 

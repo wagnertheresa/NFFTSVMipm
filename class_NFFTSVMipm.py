@@ -233,10 +233,10 @@ class NFFTSVMipm:
             Ldec = np.linalg.solve(L.T,AQ.T)
             Ldec = Ldec.T
        
-        ########################
+        #######################2
 
         #[alpha_fast, GMRESiter_fast] = svm_ipm(KER_fast,y_train,self.C,iter_ip,1e-1,self.sigma_br,100,1e-3,prec,Ldec)
-        [alpha_fast, GMRESiter_fast] = svm_ipm_pd(KER_fast,y_train,self.C,50,1e-2,self.sigma_br,100,1e-3,prec,Ldec)
+        [alpha_fast, GMRESiter_fast] = svm_ipm_pd(KER_fast,y_train,self.C,250,1e-4,self.sigma_br,100,1e-6,prec,Ldec)
 
         print("GMRES-iterations in Fastsum:", GMRESiter_fast)
         
