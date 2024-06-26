@@ -66,7 +66,7 @@ class NFFTSVMipm:
     >>> clf.predict(X_test)
     """
     
-    def __init__(self, sigma=1, C=1, indiv_sig=True, D_prec=200, sigma_br=0.2, windows=[], weights=1.0, fastadj_setup="default"):
+    def __init__(self, sigma=1, C=1, indiv_sig=True, D_prec=200, sigma_br=0.2, windows=[], weights=1.0, fastadj_setup="rough"):
         self.sigma = sigma
         self.C = C
         self.indiv_sig = indiv_sig
