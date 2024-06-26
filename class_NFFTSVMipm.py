@@ -66,7 +66,7 @@ class NFFTSVMipm:
     >>> clf.predict(X_test)
     """
     
-    def __init__(self, sigma=1, C=1, indiv_sig=True, D_prec=200, sigma_br=0.6, windows=[], weights=1.0, fastadj_setup="default"):
+    def __init__(self, sigma=1, C=1, indiv_sig=True, D_prec=200, sigma_br=0.2, windows=[], weights=1.0, fastadj_setup="default"):
         self.sigma = sigma
         self.C = C
         self.indiv_sig = indiv_sig
@@ -236,7 +236,7 @@ class NFFTSVMipm:
         #######################2
 
         #[alpha_fast, GMRESiter_fast] = svm_ipm(KER_fast,y_train,self.C,iter_ip,1e-1,self.sigma_br,100,1e-3,prec,Ldec)
-        [alpha_fast, GMRESiter_fast] = svm_ipm_pd(KER_fast,y_train,self.C,250,1e-4,self.sigma_br,100,1e-6,prec,Ldec)
+        [alpha_fast, GMRESiter_fast] = svm_ipm_pd(KER_fast,y_train,self.C,250,1e-6,self.sigma_br,100,1e-8,prec,Ldec)
 
         print("GMRES-iterations in Fastsum:", GMRESiter_fast)
         
@@ -335,7 +335,7 @@ class RandomSearch:
 
     """
     
-    def __init__(self, classifier, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", weight_scheme="no weights", sigma_br=0.6, D_prec=200, prec="chol_greedy", iter_ip=50, scoring="accuracy"):
+    def __init__(self, classifier, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", weight_scheme="no weights", sigma_br=0.2, D_prec=200, prec="chol_greedy", iter_ip=50, scoring="accuracy"):
         
         self.classifier = classifier
         self.lb = lb

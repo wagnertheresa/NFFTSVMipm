@@ -326,8 +326,8 @@ def svm_ipm_pd(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gtol, prec, Lde
         # r_dual = MAT(alpha)-1-u +v + self.y*landa
 
         # Set lower bound for mu to avoid getting too close to zero barrier
-        if (mu < tol/10):
-            mu = tol/10
+        if (mu < tol/1000):
+            mu = tol/1000
         mu_vec.append(mu)
 
         # Compute infeasibilities and norms
