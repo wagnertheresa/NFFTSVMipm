@@ -261,7 +261,7 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
         nrmxid = np.linalg.norm(xid)
         print("norm of stopping mu:",mu)
         print("Norm of the xip:", nrmxip, "norm of xid:", nrmxid)
-        
+
         if (nrmxid < dtol):
             print("\nIPM has converged!\n")
             break
