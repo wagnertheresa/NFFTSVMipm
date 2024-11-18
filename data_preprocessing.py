@@ -1,8 +1,18 @@
+"""
+Author: Theresa Wagner <theresa.wagner@mathematik.tu-chemnitz.de>
+
+Corresponding publication:
+"A Preconditioned Interior Point Method for Support Vector Machines Using an
+ANOVA-Decomposition and NFFT-Based Matrix–Vector Products"
+by T. Wagner, John W. Pearson, M. Stoll (2023)
+"""
+
 import numpy as np
-import scipy
 import random
 
 from sklearn.preprocessing import StandardScaler
+
+##################################################################################
 
 def under_sample(X, y):
         """
@@ -44,6 +54,7 @@ def under_sample(X, y):
             
         return X, y
     
+##################################################################################
     
 def z_score_normalization(Xtrain, Xtest):
     """
@@ -69,22 +80,17 @@ def z_score_normalization(Xtrain, Xtest):
     """
     print('Z-Score Normalization')
     
-    # z-score normalization
+    ## z-score normalization
     
     # fit scaler only on train data to prevent train-test contamination
     scaler = StandardScaler()
     X_fit = scaler.fit(np.asarray(Xtrain))
     X_train = X_fit.transform(np.asarray(Xtrain))
     X_test = X_fit.transform(np.asarray(Xtest))
-    
-# =============================================================================
-#     # scale data into [0,1] via the transformation x -> 0.5*(1+erf(x/sqrt(2)))
-#     X_train = 0.5 * (1 + scipy.special.erf(X_train/np.sqrt(2)))
-#     X_test = 0.5 * (1 + scipy.special.erf(X_test/np.sqrt(2)))
-# =============================================================================
-        
+         
     return X_train, X_test
 
+##################################################################################
 
 def data_preprocess(Xtrain, ytrain, Xtest, balance=True):
     """
@@ -122,4 +128,3 @@ def data_preprocess(Xtrain, ytrain, Xtest, balance=True):
     X_train, X_test = z_score_normalization(Xtrain, Xtest)
         
     return X_train, y_train, X_test
-    

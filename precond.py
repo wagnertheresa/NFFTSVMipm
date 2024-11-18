@@ -1,15 +1,26 @@
+"""
+Author: Theresa Wagner <theresa.wagner@mathematik.tu-chemnitz.de>
+
+Corresponding publication:
+"A Preconditioned Interior Point Method for Support Vector Machines Using an
+ANOVA-Decomposition and NFFT-Based Matrix–Vector Products"
+by T. Wagner, John W. Pearson, M. Stoll (2023)
+"""
+
 import numpy as np
+
+from scipy.linalg import lu_solve
 
 #################################################################################
 
 def pivoted_chol_rp(k, KER, n, alg):
     """
-    Computing multiplications with the kernel matrix of the form YKY*inx quickly.
+    Compute the pivoted Cholesky preconditioner decomposition matrix.
             
     Parameters
     ----------
     k : int
-        Desired preconditioner rank.
+        Target preconditioner rank.
     KER : object
         LinearOperator for approximating a kernel vector product.
     n : int
@@ -42,20 +53,23 @@ def pivoted_chol_rp(k, KER, n, alg):
         diags -= F[i,:]**2
         diags = diags.clip(min = 0)
         
+        if np.max(diags) < 1e-3:
+            break
+        
     Ldec = np.transpose(F)
         
     return Ldec
 
 ##################################################################################
 
-def SMW_prec(inx, n, Lp, y, dhm, test):
+def SMW_prec(inx, n, Lp, y, dhm, test, lu, piv):
     """
-    Linear operator for the Sherman-Morrison-Woodbury preconditioner.
+    Multiply the SMW preconditioner to a vector.
             
     Parameters
     ----------
     inx : ndarray
-        Array the SMW preconditioner shall be applied to.
+        The vector that is multiplied to the SMW preconditioner from the right.
     n : int
         Number of training data points.
     Lp : ndarray
@@ -63,20 +77,24 @@ def SMW_prec(inx, n, Lp, y, dhm, test):
     y : ndarray
         The training target vector.
     dhm : ndarray
-        Diagonal barrier matrix theta from the paper.
+        The diagonal barrier matrix Theta from equation (5) in the paper.
     test : ndarray
         Matrix I_k + ZD^-1Z^T from the paper.    
+    lu : ndarray
+        Matrix containing U in its upper triangle, and L in its lower triangle, for the pivoted LU decomposition PLU.
+    piv : ndarray
+        Pivot indices representing the permutation matrix P.
     
     Returns
     -------
     out : ndarray
-        The result of the SMW preconditioner applied to a vector.
+        The result of multiplying the SMW preconditioner with a vector.
     """
     # (1,1) block
     temp = inx[:n]/dhm # theta^{-1}
-    z = y*temp # Y 
+    z = y*temp
     z = Lp.conj().T@ z
-    z = np.linalg.solve(test, z)
+    z = lu_solve((lu,piv),z)
     z = Lp@z
     z = y*z
     z = z/dhm
@@ -84,7 +102,7 @@ def SMW_prec(inx, n, Lp, y, dhm, test):
     out = z
 
     # (2,2) block 
-    out = np.append(out,inx[n])    
+    out = np.append(out,-y.T@z-inx[n])    
     
     return out
 
@@ -92,21 +110,23 @@ def SMW_prec(inx, n, Lp, y, dhm, test):
     
 def get_diag(KER, n):
     """
-    Get diagonal of matrix approximated by operator KER.
+    Get the diagonal of the matrix approximated by the linear operator KER.
     
-    Note: Diagonal entries of kernel matrix are all equal.
+    Note
+    ----
+    Diagonal entries of kernel matrix are all equal.
             
     Parameters
     ----------
     KER : object
         LinearOperator for approximating a kernel vector product.
     n : int
-        Shape parameter of square matrix approximated by operator KER.
+        Shape parameter of the square matrix approximated by the linear operator KER.
     
     Returns
     -------
     out : ndarray
-        Diagonal of matrix approximated by operator KER.
+        Diagonal of the matrix approximated by the linear operator KER.
     """
     ei = np.zeros(n,)
     ei[0] = 1
@@ -119,21 +139,21 @@ def get_diag(KER, n):
 
 def get_row(i, KER, n):
     """
-    Get i-th row of matrix approximated by operator KER.
+    Get the i-th row of the matrix approximated by the linear operator KER.
             
     Parameters
     ----------
     i : int
-        Index of row that shall be returned.
+        Index of the row that shall be returned.
     KER : object
         LinearOperator for approximating a kernel vector product.
     n : int
-        Shape parameter of square matrix approximated by operator KER.
+        Shape parameter of the square matrix approximated by the linear operator KER.
         
     Returns
     -------
     row : ndarray
-       I-th row of matrix approximated by operator KER. 
+       I-th row of the matrix approximated by the operator KER. 
     """
     ei = np.zeros(n,)
     ei[i] = 1

@@ -1,46 +1,69 @@
-import numpy as np
-import fastadj
-from sklearn.metrics import pairwise_distances
+"""
+Author: Theresa Wagner <theresa.wagner@mathematik.tu-chemnitz.de>
 
-def svm_predict_fastsum(X_test, alpha, y_train, X_train, sigma, windows, weights, fastadj_setup):
+Corresponding publication:
+"A Preconditioned Interior Point Method for Support Vector Machines Using an
+ANOVA-Decomposition and NFFT-Based Matrix–Vector Products"
+by T. Wagner, John W. Pearson, M. Stoll (2023)
+"""
+
+import numpy as np
+import fastadj2
+
+##################################################################################
+
+def svm_predict_fastsum(X_test, alpha, y_train, X_train, sigma, windows, weights, kernel=1, fastadj_setup="default"):
     """
-    Predict class affiliations for the test data.
-            
+    Perform predictions based on the learned classifier parameter applying the NFFT-based fast summation approach.
+    
     Parameters
     ----------
-    X_test : ndarray
+    X_test : ndarrray
         The test data.
     alpha : ndarray
         The learned classifier parameter.
     y_train : ndarray
-        The target vector incorporating the true labels for the training data.
+        The training target vector.
     X_train : ndarray
-        The training data.
+         The training data.
     sigma : float
-        Sigma parameter for the Gaussian kernel.
+        Sigma parameter for the RBF kernel.
     windows : list
-        The list of windows determining the feature grouping.
+        The list of feature windows determining the feature grouping.
     weights : float
         The weight for the weighted sum of kernels.
-    fastadj_setup : str
+    kernel : int, default = 1
+        The indicator of the chosen kernel definition.
+        kernel=1 denotes the Gaussiam kernel, kernel=3 the Matérn(1/2) kernel.
+    fastadj_setup : str, default = "default"
         Defines the desired approximation accuracy of the NFFT fastsum method. It is one of the strings 'fine', 'default' or 'rough'.
-        
+
     Returns
     -------
     YPred : ndarray
-        The predicted class affiliations for tha test data.
+        Predictions for the test data.
     """
+    ####################
+    # setup NFFT-based fast summation
     N_sum = X_test.shape[0] + X_train.shape[0]
     arr = np.append(X_train, X_test, axis=None).reshape(N_sum,X_train.shape[1])
     
     p = np.append(alpha*y_train, np.zeros(X_test.shape[0]), axis=None).reshape(N_sum,)
     
     if isinstance(sigma, float):
-        adj_vals = [fastadj.AdjacencyMatrix(arr[:,windows[l]], sigma, setup=fastadj_setup, diagonal=1.0) for l in range(len(windows))]
+        if kernel == 1:
+            adj_vals = [fastadj2.AdjacencyMatrix(arr[:,windows[l]], np.sqrt(2)*sigma, setup=fastadj_setup, kernel=kernel, diagonal=1.0) for l in range(len(windows))]
+        elif kernel == 3:
+            adj_vals = [fastadj2.AdjacencyMatrix(arr[:,windows[l]], sigma, setup=fastadj_setup, kernel=kernel, diagonal=1.0) for l in range(len(windows))]
     else:
-        adj_vals = [fastadj.AdjacencyMatrix(arr[:,windows[l]], sigma[l], setup=fastadj_setup, diagonal=1.0) for l in range(len(windows))]
-
+        if kernel == 1:
+            adj_vals = [fastadj2.AdjacencyMatrix(arr[:,windows[l]], np.sqrt(2)*sigma[l], setup=fastadj_setup, kernel=kernel, diagonal=1.0) for l in range(len(windows))]
+        elif kernel == 3:
+            adj_vals = [fastadj2.AdjacencyMatrix(arr[:,windows[l]], sigma[l], setup=fastadj_setup, kernel=kernel, diagonal=1.0) for l in range(len(windows))]
+    
+    #####################
     ## predict responses
+    
     # perform kernel-vector multiplication
     vals_i = np.asarray([adj_vals[l].apply(p) for l in range(len(windows))])
     # add weights and sum weighted sub-kernels up
@@ -50,26 +73,3 @@ def svm_predict_fastsum(X_test, alpha, y_train, X_train, sigma, windows, weights
     YPred = np.sign(vals[-X_test.shape[0]:])
     
     return YPred
-        
-
-def kernelfun(X_test, X_train, sigma):
-    """
-    Evaluate the kernel function on the test and train data.
-            
-    Parameters
-    ----------
-    X_test : ndarray
-        The test data.
-    X_train : ndarray
-        The training data.
-    sigma : float
-        Sigma parameter for the Gaussian kernel.
-        
-    Returns
-    -------
-    k : ndarray
-        The kernel function evaluated on the test and train data.
-    """
-    k = np.exp(-(pairwise_distances(X_test, X_train))**2/(sigma**2))    
-    
-    return k

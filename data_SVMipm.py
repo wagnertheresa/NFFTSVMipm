@@ -1,24 +1,34 @@
+"""
+Author: Theresa Wagner <theresa.wagner@mathematik.tu-chemnitz.de>
+
+Corresponding publication:
+"A Preconditioned Interior Point Method for Support Vector Machines Using an
+ANOVA-Decomposition and NFFT-Based Matrix–Vector Products"
+by T. Wagner, John W. Pearson, M. Stoll (2023)
+"""
+
 import numpy as np
 import pandas as pd
 import random
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_svmlight_file
 
-##############################################
+##################################################################################
+
 # SUSY Dataset
 def susy(num=0):
     """
-    Read the SUSY Dataset and prepare it for usage.
+    Load the SUSY data set and prepare it for usage.
     
     Note
     ----
-    If num!=0, this function returns a dataset with num number of samples per class.
+    If num!=0, this function returns a balanced data set, i.e. a data set with the same number of samples in both classes.
         
     Parameters
     ----------
     num : int, default=0
         The number of samples to be included per class.
-        If num=0, all samples are included.
+        If num=0, all samples are included and the data set is not balanced out.
         
     Returns
     -------
@@ -27,9 +37,9 @@ def susy(num=0):
     X_test : ndarray
         The test data matrix.
     y_train : ndarray
-        The corresponding training target vector incorporating the labels.
+        The training target vector incorporating the training labels.
     y_test : ndarray
-        The corresponding test target vector incorporating the labels.
+        The test target vector incorporating the test labels.
     """
     # read dataset
     df = pd.read_csv("data/SUSY.csv", header=None)
@@ -53,7 +63,7 @@ def susy(num=0):
             idx_background.append(i)
         else:
             idx_signal.append(i)
- 
+            
     if num != 0:
         r1 = random.sample(idx_signal, num)
         r2 = random.sample(idx_background, num)
@@ -67,21 +77,23 @@ def susy(num=0):
     
     return X_train, X_test, y_train, y_test
 
-##############################################
+
+##################################################################################
+    
 # HIGGS Dataset
 def higgs(num=0):
     """
-    Read the HIGGS Dataset and prepare it for usage.
+    Load the HIGGS data set and prepare it for usage.
     
     Note
     ----
-    If num!=0, this function returns a dataset with num number of samples per class.
+    If num!=0, this function returns a balanced data set, i.e. a data set with the same number of samples in both classes.
         
     Parameters
     ----------
     num : int, default=0
         The number of samples to be included per class.
-        If num=0, all samples are included.
+        If num=0, all samples are included and the data set is not balanced out.
         
     Returns
     -------
@@ -90,9 +102,9 @@ def higgs(num=0):
     X_test : ndarray
         The test data matrix.
     y_train : ndarray
-        The corresponding training target vector incorporating the labels.
+        The training target vector incorporating the training labels.
     y_test : ndarray
-        The corresponding test target vector incorporating the labels.
+        The test target vector incorporating the test labels.
     """
     # read dataset
     df = pd.read_csv("data/HIGGS.csv", header=None)
@@ -116,7 +128,7 @@ def higgs(num=0):
             idx_else.append(i)
         else:
             idx_higgs.append(i)
-    
+             
     if num != 0:
         r1 = random.sample(idx_higgs, num)
         r2 = random.sample(idx_else, num)
@@ -130,22 +142,23 @@ def higgs(num=0):
     
     return X_train, X_test, y_train, y_test
 
-##############################################
+
+##################################################################################
+    
 # cod-rna Dataset
 def cod_rna(num=0):
     """
-    Read the cod-rna dataset and prepare it for usage.
+    Load the cod-rna data set and prepare it for usage.
     
     Note
     ----
-    If num!=0, this function returns a dataset with num number of samples per class.
-    The training and validation data are merged and used as the training data.    
-    
+    If num!=0, this function returns a balanced data set, i.e. a data set with the same number of samples in both classes.
+        
     Parameters
     ----------
     num : int, default=0
         The number of samples to be included per class.
-        If num=0, all samples are included.
+        If num=0, all samples are included and the data set is not balanced out.
         
     Returns
     -------
@@ -154,11 +167,11 @@ def cod_rna(num=0):
     X_test : ndarray
         The test data matrix.
     y_train : ndarray
-        The corresponding training target vector incorporating the labels.
+        The training target vector incorporating the training labels.
     y_test : ndarray
-        The corresponding test target vector incorporating the labels.
+        The test target vector incorporating the test labels.
     """
-    # determine the number of samples to be included per class in the training and the test set
+    # get the number of samples to be included per class in the training and the test set
     num_cod = int(num/2)
     
     ## read training and validation data set
@@ -178,7 +191,7 @@ def cod_rna(num=0):
             idx_pos_train.append(i)
         else:
             idx_neg_train.append(i)
-            
+ 
     if num != 0:
         r1_train = random.sample(idx_pos_train, num_cod)
         r2_train = random.sample(idx_neg_train, num_cod)
@@ -200,7 +213,7 @@ def cod_rna(num=0):
             idx_pos_test.append(i)
         else:
             idx_neg_test.append(i)
-            
+   
     if num != 0:
         r1_test = random.sample(idx_pos_test, num_cod)
         r2_test = random.sample(idx_neg_test, num_cod)
@@ -210,4 +223,3 @@ def cod_rna(num=0):
         y_test = y_test[r_samples_test]
     
     return X_train, X_test, y_train, y_test
-    

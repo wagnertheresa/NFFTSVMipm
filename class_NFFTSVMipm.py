@@ -1,44 +1,58 @@
+"""
+Author: Theresa Wagner <theresa.wagner@mathematik.tu-chemnitz.de>
+
+Corresponding publication:
+"A Preconditioned Interior Point Method for Support Vector Machines Using an
+ANOVA-Decomposition and NFFT-Based Matrix–Vector Products"
+by T. Wagner, John W. Pearson, M. Stoll (2023)
+"""
+
 import numpy as np
 import pandas as pd
+import math
 import random
 import time
 import scipy
 
-import fastadj
-# import libsvm.svmutil for comparison 
+import fastadj2
+
+from sklearn.feature_selection import mutual_info_classif
 from libsvm import svmutil
 
 # import auxiliary functions
-from svm_ipm import svm_ipm,svm_ipm_pd
+from svm_ipm import svm_ipm_pd_line_search
 from precond import pivoted_chol_rp
 from svm_predict_fastsum import svm_predict_fastsum
 from data_preprocessing import data_preprocess
 
-from sklearn.feature_selection import mutual_info_classif
+##################################################################################
 
 class NFFTSVMipm:
     """
-    Preconditioned Interior-Point Method for Support Vector Machines
+    Perform a preconditioned Interior-Point Method for Support Vector Machines.
     
     Parameters
     ----------
     sigma : float, default=1.0
-         Sigma parameter for the Gaussian kernel.
+        Sigma parameter for the RBF kernel.
     C : float, default=1.0
         The regularization parameter controlling the amount of misclassification.
         The relative weight of error vs. margin, such that 0 <= alpha <= C.
     indiv_sig : bool, default=True
         Whether the kernel consists of a sum of kernels, i.e. several sigmas are needed.
-        If classifier="NFFTSVMipm" indiv_sig=True if len(windows)>1, indiv_sig=False else.
-        If classifier="LIBSVM" indiv_sig=False.
+        If classifier="NFFTSVMipm", indiv_sig=True if len(windows)>1, indiv_sig=False else.
+        If classifier="LIBSVM", indiv_sig=False.
     D_prec : int, default=200
         The desired rank of the preconditioner.
-    sigma_br : float, default=0.6
+    sigma_br : float, default=0.2
         The barrier reduction parameter.
     windows : list, default=[]
         The list of windows determining the feature grouping.
     weights : float, default=1.0
         The weight for the weighted sum of kernels.
+    kernel : int, default = 1
+        The indicator of the chosen kernel definition.
+        kernel=1 denotes the Gaussiam kernel, kernel=3 the Matérn(1/2) kernel.
     fastadj_setup : str, default="default"
         Defines the desired approximation accuracy of the NFFT fastsum method. It is one of the strings 'fine', 'default' or 'rough'.
         
@@ -46,11 +60,12 @@ class NFFTSVMipm:
     ----------
     
     alpha_fast : ndarray
-        The dual-variable for the SVM-Model.
+        The learned classifier parameter.
     Xtrain : ndarray
-        The training data used to fit the model.
+        The (preprocessed) training data used to fit the model.
     ytrain : ndarray
         The corresponding target vector.
+        
     
     Examples
     --------
@@ -66,7 +81,7 @@ class NFFTSVMipm:
     >>> clf.predict(X_test)
     """
     
-    def __init__(self, sigma=1, C=1, indiv_sig=True, D_prec=200, sigma_br=0.6, windows=[], weights=1.0, fastadj_setup="default"):
+    def __init__(self, sigma=1.0, C=1.0, indiv_sig=True, D_prec=200, sigma_br=0.2, windows=[], weights=1.0, kernel=1, fastadj_setup="default"):
         self.sigma = sigma
         self.C = C
         self.indiv_sig = indiv_sig
@@ -74,6 +89,7 @@ class NFFTSVMipm:
         self.sigma_br = sigma_br
         self.windows = windows
         self.weights = weights
+        self.kernel = kernel
         self.fastadj_setup = fastadj_setup
         
     ############################################################################
@@ -85,7 +101,7 @@ class NFFTSVMipm:
         Parameters
         ----------
         X_train : ndarray
-            The train data.
+            The training data.
         
         Returns
         -------
@@ -94,9 +110,15 @@ class NFFTSVMipm:
         """
         ## setup computations with the adjacency matrices
         if self.indiv_sig == True:
-            adj_mats = [fastadj.AdjacencyMatrix(X_train[:,self.windows[l]], self.sigma[l], setup=self.fastadj_setup, diagonal=1.0) for l in range(len(self.windows))]
+            if self.kernel == 1:
+                adj_mats = [fastadj2.AdjacencyMatrix(X_train[:,self.windows[l]], np.sqrt(2)*self.sigma[l], setup=self.fastadj_setup, kernel=self.kernel, diagonal=1.0) for l in range(len(self.windows))]
+            elif self.kernel == 3:
+                adj_mats = [fastadj2.AdjacencyMatrix(X_train[:,self.windows[l]], self.sigma[l], setup=self.fastadj_setup, kernel=self.kernel, diagonal=1.0) for l in range(len(self.windows))]
         else:
-            adj_mats = [fastadj.AdjacencyMatrix(X_train[:,self.windows[l]], self.sigma, setup=self.fastadj_setup, diagonal=1.0) for l in range(len(self.windows))]
+            if self.kernel == 1:
+                adj_mats = [fastadj2.AdjacencyMatrix(X_train[:,self.windows[l]], np.sqrt(2)*self.sigma, setup=self.fastadj_setup, kernel=self.kernel, diagonal=1.0) for l in range(len(self.windows))]
+            elif self.kernel == 3:
+                adj_mats = [fastadj2.AdjacencyMatrix(X_train[:,self.windows[l]], self.sigma, setup=self.fastadj_setup, kernel=self.kernel, diagonal=1.0) for l in range(len(self.windows))]
         
         return adj_mats
         
@@ -109,7 +131,7 @@ class NFFTSVMipm:
         Parameters
         ----------
         adj_mats : object
-            The adjacency matrix object.
+            The adjacency matrix object for multiplying the matrix A by a vector from the right.
         p : ndarray
             The vector, whose product A*p with the matrix A shall be approximated.
 
@@ -134,20 +156,26 @@ class NFFTSVMipm:
         
     ##############################################################################
     
-    def fit(self, X_train, y_train, prec, iter_ip):
+    def fit(self, X_train, y_train, prec, iter_ip, tol, Gmaxiter, Gtol):
         """
-        Perform the IPM for training the SVM on the train data.
+        Perform the IPM for training the SVM on the training data.
         
         Parameters
         ----------
         X_train : ndarray
-            The train data.
+            The training data.
         y_train : ndarray
             The corresponding target vector.
         prec : str
-            The preconditioner that shall be used for the IPM.
+            The preconditioner that shall be used to precondition the kernel matrix within the IPM.
         iter_ip : int
             The maximum number of interior point iterations.
+        tol : float
+            The interior point method convergence tolerance.
+        Gmaxiter : int
+            The maximum number of GMRES iterations.
+        Gtol : float
+            The GMRES convergence tolerance.
 
         Returns
         -------
@@ -155,36 +183,42 @@ class NFFTSVMipm:
             The learned classifier parameter.
         GMRESiter_fast : list
             Number of GMRES iterations within the interior points iterations.
-        """            
+        IPMiter_fast : int
+            Number of IPM iterations.
+        time_fastadjsetup : float
+            The measured time for setting up the fastadj operator for approximating kernel-vector products.
+        """
+        # start timing fastadj setup
+        start_fastadjsetup = time.time()
+        
         # set up computations with adjacency matrix
         adj_mats = self.init_fast_matvec(X_train)
         
         # define LinearOperator for fast matrix-vector multiplications
         KER_fast = lambda p: self.fast_matvec(adj_mats, p)
+        
+        # end timing fastadj setup
+        time_fastadjsetup = time.time() - start_fastadjsetup
 
         #####################
         ## PRECONDITIONING
         #####################
-        # preconditioning with cholesky --> see svm_ipm.py
+        # pivoted Cholesky (greedy)
         if prec == "chol_greedy":
-            ## GREEDY-BASED PIVOTED CHOLESKY APPROACH      
             MM = self.D_prec
             n = len(y_train)
             Ldec = pivoted_chol_rp(MM,KER_fast,n,"greedy")
                 
         ########################
+        # randomized pivoted Cholesky (rp)
         elif prec == "chol_rp":
-            ## RANDOMIZED PIVOTED CHOLESKY APPROACH
             MM = self.D_prec
             n = len(y_train)
             Ldec = pivoted_chol_rp(MM,KER_fast,n,"rp")
             
         ######################
-        # preconditioning with random fourier features
+        # random Fourier features
         elif prec == "rff":
-            ## RANDOM FOURIER FEATURES APPROACH
-            # https://github.com/hichamjanati/srf/blob/master/RFF-I.ipynb
-            
             # initialize array of decompositions
             Ldec = []
             
@@ -206,8 +240,8 @@ class NFFTSVMipm:
             Ldec = np.concatenate(Ldec, axis=1)
         
         ###########################
+        # Nyström decomposition
         elif prec == "nystrom":
-            ## Nyström APPROACH
             
             # setup Nyström decomposition
             k = self.D_prec
@@ -233,18 +267,19 @@ class NFFTSVMipm:
             Ldec = np.linalg.solve(L.T,AQ.T)
             Ldec = Ldec.T
        
-        ########################
+        #######################
 
-        #[alpha_fast, GMRESiter_fast] = svm_ipm(KER_fast,y_train,self.C,iter_ip,1e-1,self.sigma_br,100,1e-3,prec,Ldec)
-        [alpha_fast, GMRESiter_fast] = svm_ipm_pd(KER_fast,y_train,self.C,50,1e-2,self.sigma_br,100,1e-3,prec,Ldec)
+        # perform interior point method with line search routine for determining step size
+        [alpha_fast, GMRESiter_fast, IPMiter_fast] = svm_ipm_pd_line_search(KER_fast,y_train,self.C,iter_ip,tol,self.sigma_br,Gmaxiter,Gtol,prec,Ldec)
 
         print("GMRES-iterations in Fastsum:", GMRESiter_fast)
+        print("IPM-iterations in Fastsum:", IPMiter_fast)
         
         self.alpha_fast = alpha_fast
         self.Xtrain = X_train
         self.ytrain = y_train
         
-        return alpha_fast, GMRESiter_fast
+        return alpha_fast, GMRESiter_fast, IPMiter_fast, time_fastadjsetup
     
     ##############################################################################
     
@@ -262,8 +297,8 @@ class NFFTSVMipm:
         yhat_fast : ndarray
             The predicted class affiliations for the test data.
         """        
-        ## NFFT-BASED FAST SUMMATION APPROACH
-        yhat_fast = svm_predict_fastsum(X_test,self.alpha_fast,self.ytrain,self.Xtrain,self.sigma,self.windows,self.weights,self.fastadj_setup)
+        # make predictions using the NFFT-based fast summation approach
+        yhat_fast = svm_predict_fastsum(X_test, self.alpha_fast, self.ytrain, self.Xtrain, self.sigma, self.windows, self.weights, self.kernel, self.fastadj_setup)
         
         return yhat_fast
 
@@ -273,14 +308,12 @@ class NFFTSVMipm:
 
 class RandomSearch:
     """
-    https://medium.com/analytics-vidhya/how-does-random-search-algorithm-work-python-implementation-b69e779656d6
-    
-    Hyperparameter optimization based on RandomSearch.
+    Hyperparameter optimization for NFFTSVMipm based on a random search routine.
     
     Parameters
     ----------
     classifier : str, default="NFFTSVMipm"
-        The classifier parameter determines, for which classifier RandomSearch shall be performed.
+        The classifier parameter determining for which classifier RandomSearch shall be performed.
         It is either "NFTTSVMipm" or "LIBSVM".
     lb : list
         List of lower bounds for the parameters sigma/gamma and C.
@@ -295,18 +328,26 @@ class RandomSearch:
         If "mis" is passed, the features are seperated up into windows following their mutual information scores in descending order.
         If "consec", the windows are built following the feature indices in ascending order.
         If "random", the windows of features are built randomly.
-    weight_scheme : str, default="no weights"
-        The weighting-scheme determining how the weights in the weighted sum of kernels are built.
+    d_ratio : float, default=2/3
+        Ratio for number of features included into the model. Features that do not belong to the highest proportion d_ratio of features are dropped.
+    weight_scheme : str, default="equally weighted"
+        The weighting-scheme determining how the weights in the weighted sum of kernels are determined.
         If weight_scheme="equally weighted", all weights are equal, so that they sum up to 1.
         If weight_scheme="no weights", all weights are 1.
-    sigma_br : float, default=0.6
+    sigma_br : float, default=0.2
         Barrier reduction parameter used in the IPM.
     D_prec : int, default=200
-        Rank of the low-rank decomposition based preconditioner for the IPM.
+        Target rank of the low-rank decomposition-based preconditioner for the IPM.
     prec : str, default="chol_greedy"
-        The preconditioner that shall be used in the IPM.
-    iter_ip : int, default=50
+        TThe preconditioner that shall be used to precondition the kernel matrix within the IPM.
+    iter_ip : int, default=100
         Maximum number of interior point iterations.
+    tol : float, default=1e-3
+    	The interior point method convergence tolerance.
+    Gmaxiter : int, default=100
+    	The maximum number of GMRES iterations.
+    Gtol : float, , default=1e-6
+    	The GMRES convergence tolerance.
     scoring : str, default="accuracy"
         The scoring parameter determines, which evaluation metric shall be used for measuring the prediction quality.
         It is either "accuracy", "precision" or "recall".
@@ -318,36 +359,41 @@ class RandomSearch:
     weights : float
         The weight used for weighted sum of kernels.
     indiv_sig : bool
-        Whether the kernel consists of a sum of kernels, i.e. several sigmas are needed.
-        If classifier="NFFTSVMipm" indiv_sig=True if len(windows)>1, indiv_sig=False else.
-        If classifier="LIBSVM" indiv_sig=False.
+        Whether the kernel consists of a sum of kernels with individual length-scale parameters, i.e. several sigmas are needed.
+        If classifier="NFFTSVMipm", indiv_sig=True if len(windows)>1, indiv_sig=False else.
+        If classifier="LIBSVM", indiv_sig=False.
     lb_rs : list
         List of lower bounds for the parameters RandomSearch is performed on.
-        If classifier="NFFTSVMipm" the number of sigma parameters equals the number of windows/kernels.
-        If classifier="LIBSVM" the parameters gamma and C only exist once each.
+        If classifier="NFFTSVMipm", the number of sigma parameters equals the number of windows/kernels.
+        If classifier="LIBSVM", the parameters gamma and C only exist once each.
     ub_rs : list
         List of upper bounds for the parameters RandomSearch is performed on.
-        If classifier="NFFTSVMipm" the number of sigma parameters equals the number of windows/kernels.
-        If classifier="LIBSVM" the parameters gamma and C only exist once each.
+        If classifier="NFFTSVMipm", the number of sigma parameters equals the number of windows/kernels.
+        If classifier="LIBSVM", the parameters gamma and C only exist once each.
     
     Examples
     --------
 
     """
     
-    def __init__(self, classifier, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", weight_scheme="no weights", sigma_br=0.6, D_prec=200, prec="chol_greedy", iter_ip=50, scoring="accuracy"):
+    def __init__(self, classifier, kernel, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", d_ratio=2/3, weight_scheme="equally weighted", sigma_br=0.2, D_prec=200, prec="chol_greedy", iter_ip=100, tol=1e-3, Gmaxiter=100, Gtol=1e-6, scoring="accuracy"):
         
         self.classifier = classifier
+        self.kernel = kernel
         self.lb = lb
         self.ub = ub
         self.max_iter_rs = max_iter_rs
         self.mis_threshold = mis_threshold
         self.window_scheme = window_scheme
+        self.d_ratio = d_ratio
         self.weight_scheme = weight_scheme
         self.sigma_br = sigma_br
         self.D_prec = D_prec
         self.prec = prec
         self.iter_ip = iter_ip
+        self.tol = tol
+        self.Gmaxiter = Gmaxiter
+        self.Gtol = Gtol
         self.scoring = scoring
         
     #############################################################################
@@ -378,7 +424,6 @@ class RandomSearch:
         FP = 0
         FN = 0
         for j in range(len(Y)):
-            #print(Y[j], YPred[j])
             if Y[j]==1.0:
                 if YPred[j]==1.0:
                     TP += 1
@@ -415,7 +460,7 @@ class RandomSearch:
     
     def make_mi_scores(self, X, y):
         """
-        Compute the mutual information scores.
+        Compute the mutual information scores and return a list of feature indices corresponsing to the MIS in descending order.
             
         Parameters
         ----------
@@ -427,7 +472,7 @@ class RandomSearch:
         Returns
         -------
         res_idx : list
-            List of feature indices following their mutual information scores in descending order.   
+            List of feature indices corresponding to their mutual information scores in descending order.
         """
         threshold = self.mis_threshold
         
@@ -448,23 +493,27 @@ class RandomSearch:
         res_scores = [i for i in sorted_scores if i >= threshold]
         res_idx = sorted_idx[:len(res_scores)]
         
+        # satisfy ratio of features condition
+        dmax = math.ceil(X.shape[1]*self.d_ratio)
+        res_idx = sorted_idx[:dmax]
+        
         return res_idx
         
     ##############################################################################
     
     def get_windows(self, mi_idx):
         """
-        Construct a list of windows of features based on MIS-ranking.
+        Construct a list of feature windows based on a MIS-ranking.
             
         Parameters
         ----------
-        windows : list
-            The corresponding list of feature windows.
+        mi_idx : list
+            List of feature indices corresponding to their mutual information scores in descending order.
         
         Returns
         -------
         windows : list
-            List of windows of features.
+            List of feature windows.
         """
         # number of features
         d = len(mi_idx)
@@ -496,9 +545,9 @@ class RandomSearch:
         Returns
         -------
         X_train : ndarray
-            The balanced and z-score normalized train data.
+            The balanced and z-score normalized training data.
         y_train : ndarray
-            The corresponding target vector to the balanced train data.
+            The corresponding target vector to the balanced training data.
         X_test : ndarray
             The z-score normalized test data.
         """
@@ -507,8 +556,10 @@ class RandomSearch:
         X_train, y_train, X_test = data_preprocess(X_train, y_train, X_test, balance=True)
         
         if self.classifier == "NFFTSVMipm":
-            #######################
-            ## determine windows of features
+
+            ##################################
+            ## determine feature windows
+            
             # determine windows of features by their mis
             if self.window_scheme == "mis":
                 if X_train.shape[1] > 3:
@@ -540,7 +591,6 @@ class RandomSearch:
                 self.windows = self.get_windows(idx_list)
             
             ##################################
-            
             ## compute kernel weights
                     
             # equally weighted kernels, so that weights sum up to 1
@@ -561,12 +611,13 @@ class RandomSearch:
     
     def optimize(self, params, X_train, y_train, X_test, y_test):
         """
-        Fit and train the model, make predictions for unseen data points an measure the runtime.
+        Fit and train the model for a given parameter combination params, make predictions for unseen data points an measure the runtime.
             
         Parameters
         ----------
         params : list
             Parameter combination the model shall be performed on.
+            The parameter list is of the form: [[l1,...,lP],C]
         X_train : ndarray
             The training data.
         y_train : ndarray
@@ -586,19 +637,18 @@ class RandomSearch:
             The evaluation metrics (accuracy, precision, recall) obtained by comparing the preditions for the unseen data with the true target values.
         """
         if self.classifier == "NFFTSVMipm":
-            # measure time needed for fitting
+            # measure fitting time
             start_fit = time.time()
             
-            clf = NFFTSVMipm(sigma=params[0], C=params[1], indiv_sig=self.indiv_sig, D_prec=self.D_prec, sigma_br=self.sigma_br, windows=self.windows, weights=self.weights)
+            clf = NFFTSVMipm(sigma=params[0], C=params[1], indiv_sig=self.indiv_sig, D_prec=self.D_prec, sigma_br=self.sigma_br, windows=self.windows, weights=self.weights, kernel=self.kernel)
         
-            alpha, GMRESiter = clf.fit(X_train, y_train, self.prec, self.iter_ip)
+            alpha, GMRESiter, IPMiter, time_fastadjsetup = clf.fit(X_train, y_train, self.prec, self.iter_ip, self.tol, self.Gmaxiter, self.Gtol)
             
             time_fit = time.time() - start_fit
             
-            # measure time needed for predicting
+            # measure prediction time
             start_predict = time.time()
             
-            #evaluation, evaluation_minimize = clf.predict(X_test)
             evaluation = clf.predict(X_test)
             
             time_pred = time.time() - start_predict
@@ -606,7 +656,7 @@ class RandomSearch:
             # compute prediction result
             result = self.evaluation_metrics(y_test,evaluation)
                 
-            return time_fit, time_pred, result, GMRESiter
+            return time_fit, time_pred, result, GMRESiter, IPMiter, time_fastadjsetup
             
         elif self.classifier == "LIBSVM":
             
@@ -621,7 +671,7 @@ class RandomSearch:
             param.gamma = params[0]
             param.C = params[1]
         
-            # measure time needed for fitting
+            # measure fitting time
             start_fit = time.time()
         
             problem = svmutil.svm_problem(y_train, X_train)
@@ -630,7 +680,7 @@ class RandomSearch:
             
             time_fit = time.time() - start_fit
             
-            # measure time needed for predicting
+            # measure prediction time
             start_predict = time.time()
             
             pred_lbl, pred_acc, pred_val = svmutil.svm_predict(y_test, X_test, train, "-q")
@@ -664,24 +714,27 @@ class RandomSearch:
         Returns
         -------
         best_params : list
-            List of the parameters, which yield the highest value for the chosen scoring-parameter (accuracy, precision or recall).
+            List of the parameters, which yield the highest value out of all candidates in the random search routine for the chosen scoring-parameter (accuracy, precision or recall).
         best_result : list
-            List of the best results, where the chosen scoring-parameter is crucial.
+            List of the best results out of all runs within the random search routine.
         best_time_fit : float
-            Fitting time of the run, that yielded the best result.
+            Fitting time of the run, whicg yielded the best result.
         best_time_pred : float
-            Prediction time of the run, that yielded the best result.
+            Prediction time of the run, which yielded the best result.
         mean_total_time_fit : float
             Mean value over the fitting times of all candidate parameters.
         mean_total_time_pred : float
             Mean value over the prediction times of all candidate parameters.
         (D_prec : int
-            Rank of the low-rank decomposition based preconditioner for the IPM.
+            Target rank of the low-rank decomposition based preconditioner for the IPM.
         best_GMRESiter : list
             Number of GMRES iterations at each IPM step for the run yielding the best prediction quality.
         mean_GMRESiter : list
-            List of the mean number of GMRES iterations at each IPM step for all runs.)
-        
+            List of the mean number of GMRES iterations at each IPM step for all runs.
+        best_IPMiter : float
+            Number of IPM iterations of the run, which yielded the best results.
+        best_time_fastadjsetup : float
+            The measured time for setting up the fastadj operator for approximating kernel-vector products of the run, which yielded the best reuslts.)
         """
         total_time_fit = []
         total_time_pred = []
@@ -703,8 +756,8 @@ class RandomSearch:
             else:
                 self.indiv_sig = False
                 
-                self.lb_rs = self.lb
-                self.ub_rs = self.ub
+                self.lb_rs = [self.lb[0], self.lb[1]]
+                self.ub_rs = [self.ub[0], self.ub[1]]
         
         elif self.classifier == "LIBSVM":
             self.indiv_sig = False
@@ -729,7 +782,7 @@ class RandomSearch:
         best_params[1] = random.uniform(self.lb_rs[1], self.ub_rs[1])
         
         if self.classifier == "NFFTSVMipm":
-            best_time_fit, best_time_pred, best_result, best_GMRESiter = self.optimize(best_params, X_train, y_train, X_test, y_test)
+            best_time_fit, best_time_pred, best_result, best_GMRESiter, best_IPMiter, best_time_fastadjsetup = self.optimize(best_params, X_train, y_train, X_test, y_test)
         elif self.classifier == "LIBSVM":
             best_time_fit, best_time_pred, best_result = self.optimize(best_params, X_train, y_train, X_test, y_test)
             
@@ -738,6 +791,8 @@ class RandomSearch:
         print("Time Fit:", best_time_fit)
         if self.classifier == "NFFTSVMipm":
             print("GMRESiters:", best_GMRESiter)
+            print("IPMiters:", best_IPMiter)
+            print("time fastadjsetup:", best_time_fastadjsetup)
         
         total_time_fit.append(best_time_fit)
         total_time_pred.append(best_time_pred)
@@ -758,7 +813,7 @@ class RandomSearch:
     
             if np.greater_equal(new_params[0], self.lb_rs[0]).all() and np.greater_equal(new_params[1], self.lb_rs[1]).all() and np.less_equal(new_params[0], self.ub_rs[0]).all() and np.less_equal(new_params[1], self.ub_rs[1]).all():
                 if self.classifier == "NFFTSVMipm":
-                    new_time_fit, new_time_pred, new_result, new_GMRESiter = self.optimize(new_params, X_train, y_train, X_test, y_test)
+                    new_time_fit, new_time_pred, new_result, new_GMRESiter, new_IPMiter, new_time_fastadjsetup = self.optimize(new_params, X_train, y_train, X_test, y_test)
                 elif self.classifier == "LIBSVM":
                     new_time_fit, new_time_pred, new_result = self.optimize(new_params, X_train, y_train, X_test, y_test)
             
@@ -776,6 +831,8 @@ class RandomSearch:
             print("Time Fit:", new_time_fit)
             if self.classifier == "NFFTSVMipm":
                 print("GMRESiter:", new_GMRESiter)
+                print("IPMiter:", new_IPMiter)
+                print("time fastadjsetup:", new_time_fastadjsetup)
             
             if self.scoring == "accuracy":
                 if new_result[0] > best_result[0]:
@@ -785,6 +842,8 @@ class RandomSearch:
                     best_time_pred = new_time_pred
                     if self.classifier == "NFFTSVMipm":
                         best_GMRESiter = new_GMRESiter
+                        best_IPMiter = new_IPMiter
+                        best_time_fastadjsetup = new_time_fastadjsetup
 
             elif self.scoring == "precision":
                 if new_result[1] > best_result[1]:
@@ -794,6 +853,8 @@ class RandomSearch:
                     best_time_pred = new_time_pred
                     if self.classifier == "NFFTSVMipm":
                         best_GMRESiter = new_GMRESiter
+                        best_IPMiter = new_IPMiter
+                        best_time_fastadjsetup = new_time_fastadjsetup
 
             elif self.scoring == "recall":
                 if new_result[2] > best_result[2]:
@@ -803,8 +864,10 @@ class RandomSearch:
                     best_time_pred = new_time_pred
                     if self.classifier == "NFFTSVMipm":
                         best_GMRESiter = new_GMRESiter
+                        best_IPMiter = new_IPMiter
+                        best_time_fastadjsetup = new_time_fastadjsetup
             
         if self.classifier == "NFFTSVMipm":
-            return best_params, best_result, best_time_fit, best_time_pred, np.mean(total_time_fit), np.mean(total_time_pred), self.D_prec, best_GMRESiter, mean_GMRESiter
+            return best_params, best_result, best_time_fit, best_time_pred, np.mean(total_time_fit), np.mean(total_time_pred), self.D_prec, best_GMRESiter, mean_GMRESiter, best_IPMiter, best_time_fastadjsetup
         elif self.classifier == "LIBSVM":
             return best_params, best_result, best_time_fit, best_time_pred, np.mean(total_time_fit), np.mean(total_time_pred)
