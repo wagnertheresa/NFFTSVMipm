@@ -14,47 +14,79 @@ import numpy as np
 from class_NFFTSVMipm import RandomSearch
 
 ##################################################################################
+## READ PARSED ARGUMENTS
+
+import argparse
+
+# Create the argument parser
+parser = argparse.ArgumentParser(description="Run test on IPM/GMRES convergence tolerance with configurable parameters.")
+
+# Add arguments
+parser.add_argument('--kernel', type=int, default=1, choices=[1, 3], 
+                    help="Kernel type: 1 for Gaussian, 3 for Matérn(1/2), default=1.")
+parser.add_argument('--Ndata', nargs='+', type=int, default=[0], 
+                    help="List of subset sizes to consider, where 0 corresponds to the entire data set, default=[0].")
+parser.add_argument('--prec', type=str, default="chol_greedy", choices=["chol_greedy", "chol_rp", "rff", "nystrom"],
+                    help="Preconditioner types, default='chol_greedy'.")
+parser.add_argument('--rank', type=int, default=200, 
+                    help="Target preconditioner rank, default=200.")
+parser.add_argument('--iRS', type=int, default=25, 
+                    help="Number of iterations in RandomSearch, default=25.")
+parser.add_argument('--mis_thres', type=float, default=0.0, 
+                    help="Mutual information score threshold, default=0.0.")
+parser.add_argument('--window_scheme', type=str, default="mis", choices=["mis", "consec", "random"],
+                    help="Window scheme: 'mis', 'consec', or 'random', default='mis'.")
+parser.add_argument('--weight_scheme', type=str, default="equally weighted", choices=["equally weighted", "no weights"], 
+                    help="Weight scheme: 'equally weighted' or 'no weights'.")
+parser.add_argument('--IPMiter', type=int, default=100, 
+                    help="Maximum number of IPM iterations, default=100.")
+parser.add_argument('--GMRESiter', type=int, default=100, 
+                    help="Maximum number of GMRES iterations, default=100.")
+parser.add_argument('--sbr', type=float, default=0.2, 
+                    help="Sigma barrier reduction IPM parameter, default=0.2.")
+parser.add_argument('--dratio', type=float, default=1.0, 
+                    help="Proportion of features to include, default=1.0.")
+parser.add_argument('--data', type=str, default="cod_rna", choices=["susy", "cod_rna", "higgs"], 
+                    help="Data sets to use, default='cod_rna'.")
+
+# Parse arguments
+args = parser.parse_args()
+
+# Assign the parsed arguments to the parameters
+
+# kernel definition
+kernel = args.kernel
+# subset sizes
+if isinstance(args.Ndata, int):
+    Ndata = [args.Ndata]
+else:
+    Ndata = args.Ndata
+# preconditioner
+prec = args.prec
+# target preconditioner rank
+Dprec = args.rank
+# number of iterations in RandomSearch
+iRS = args.iRS
+# mutual information score threshold
+mis_thres = args.mis_thres
+# window scheme
+window_scheme = args.window_scheme
+# weight scheme
+weight_scheme = args.weight_scheme
+# maximum number of IPM iterations
+iter_ip = args.IPMiter
+# maximum number of GMRES iterations
+Gmaxiter = args.GMRESiter
+# sigma_br parameter
+sbr = args.sbr
+# dratio
+dr = args.dratio
+# data set
+data = args.data
 
 ####################
 ## CHOOSE PARAMETERS
 
-# choose kernel definition
-kernel = 1 # Gaussian kernel
-#kernel = 3 # Matérn(1/2) kernel
-
-# choose data set
-#data = "higgs"
-#data = "susy"
-data = "cod_rna"
-
-# choose subset sizes
-Ndata = [0] # 0 corresponds to entire data set
-
-# set number of iterations in RandomSearch
-iRS = 25
-# mutual information score threshold
-mis_thres = 0.0
-# choose window scheme
-window_scheme = "mis"
-#window_scheme = "consec"
-#window_scheme = "random"
-# choose weight scheme
-weight_scheme = "equally weighted"
-#weight_scheme = "no weights"
-# choose target preconditioner rank
-Dprec = 200
-# choose precondioner
-prec = "chol_greedy"
-#prec = "chol_rp"
-#prec = "rff"
-#prec = "nystrom"
-# choose maximum number of IPM iterations
-iter_ip = 100
-# choose maximum number of GMRES iterations
-Gmaxiter = 100
-
-# define sigma_br parameter
-sbr = 0.2
 # define list of candidates for IPM/GMRES tolerance combination
 tol_list = [[1e-1,1e-4], [1e-2,1e-5], [1e-3,1e-6], [1e-4,1e-7]]
 
@@ -83,24 +115,15 @@ for n in Ndata:
     if data == "higgs":
         from data_SVMipm import higgs
             
-        # define d_ratio
-        dr = 1/3
-            
         X_train, X_test, y_train, y_test = higgs(n)
 		
     elif data == "susy":
         from data_SVMipm import susy
 		
-        # define d_ratio
-        dr = 2/3
-		
         X_train, X_test, y_train, y_test = susy(n)
 		
     elif data == "cod_rna":
         from data_SVMipm import cod_rna
-        
-        # define d_ratio
-        dr = 1
 		
         X_train, X_test, y_train, y_test = cod_rna(n)
 		

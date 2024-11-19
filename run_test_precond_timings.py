@@ -12,25 +12,51 @@ Execute this file to reproduce the results presented in Figure 2.
 from func_prec_timings import main_precond_timings
 
 ##################################################################################
+## READ PARSED ARGUMENTS
 
+import argparse
+
+# Create the argument parser
+parser = argparse.ArgumentParser(description="Run preconditioner timings test with configurable parameters.")
+
+# Add arguments
+parser.add_argument('--kernel', type=int, default=1, choices=[1, 3], 
+                    help="Kernel type: 1 for Gaussian, 3 for Matérn(1/2), default=1.")
+parser.add_argument('--Ndata', nargs='+', type=int, default=[10000, 50000, 100000, 0], 
+                    help="List of subset size candidates, where 0 corresponds to the entire data set, default=[10000, 50000, 100000, 0].")
+parser.add_argument('--prec', nargs='+', type=str, default=["chol_greedy", "chol_rp", "rff", "nystrom"], choices=["chol_greedy", "chol_rp", "rff", "nystrom"],
+                    help="List of preconditioner type candidates, default=['chol_greedy', 'chol_rp', 'rff', 'nystrom'].")
+parser.add_argument('--rank', nargs='+', type=int, default=[50, 200, 1000], 
+                    help="List of target preconditioner rank candidates, default=[50, 200, 1000].")
+
+# Parse arguments
+args = parser.parse_args()
+
+# Assign the parsed arguments to the parameters
+
+# kernel definition
+kernel = args.kernel
+# subset sizes
+if isinstance(args.Ndata, int):
+    Ndata = [args.Ndata]
+else:
+    Ndata = args.Ndata
+# list of preconditioner candidates
+if isinstance(args.prec, str):
+    prec_list = [args.prec]
+else:
+    prec_list = args.prec
+# list of target preconditioner rank candidates
+if isinstance(args.rank, int):
+    rank_list = [args.rank]
+else:
+    rank_list = args.rank
+    
 ####################
 ## CHOOSE PARAMETERS
 
-# choose kernel definition
-kernel = 1 # Gaussian kernel
-#kernel = 3 # Matérn(1/2) kernel
-
 # choose data set
 data = "cod_rna"
-
-# choose subset sizes
-Ndata = [10000, 50000, 100000, 0] # 0 corresponds to entire data set
-
-# define list of preconditioner candidates
-prec_list = ["chol_greedy", "chol_rp", "rff", "nystrom"]
-
-# define list of target preconditioner rank candidates
-rank_list = [50, 200, 1000]
 
 ####################
 # initialize dict for results

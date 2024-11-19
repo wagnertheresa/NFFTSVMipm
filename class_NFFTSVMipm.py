@@ -328,7 +328,7 @@ class RandomSearch:
         If "mis" is passed, the features are seperated up into windows following their mutual information scores in descending order.
         If "consec", the windows are built following the feature indices in ascending order.
         If "random", the windows of features are built randomly.
-    d_ratio : float, default=2/3
+    d_ratio : float, default=1
         Ratio for number of features included into the model. Features that do not belong to the highest proportion d_ratio of features are dropped.
     weight_scheme : str, default="equally weighted"
         The weighting-scheme determining how the weights in the weighted sum of kernels are determined.
@@ -376,7 +376,7 @@ class RandomSearch:
 
     """
     
-    def __init__(self, classifier, kernel, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", d_ratio=2/3, weight_scheme="equally weighted", sigma_br=0.2, D_prec=200, prec="chol_greedy", iter_ip=100, tol=1e-3, Gmaxiter=100, Gtol=1e-6, scoring="accuracy"):
+    def __init__(self, classifier, kernel, lb, ub, max_iter_rs=25, mis_threshold=0.0, window_scheme="mis", d_ratio=1, weight_scheme="equally weighted", sigma_br=0.2, D_prec=200, prec="chol_greedy", iter_ip=100, tol=1e-3, Gmaxiter=100, Gtol=1e-6, scoring="accuracy"):
         
         self.classifier = classifier
         self.kernel = kernel

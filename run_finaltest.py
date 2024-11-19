@@ -14,42 +14,67 @@ import numpy as np
 from class_NFFTSVMipm import RandomSearch
 
 ##################################################################################
+## READ PARSED ARGUMENTS
 
-####################
-## CHOOSE PARAMETERS
+import argparse
 
-# determine kernel definition
-kernel = 1 # Gaussian kernel 
-#kernel = 3 # Matérn(1/2) kernel 
+# Create the argument parser
+parser = argparse.ArgumentParser(description="Run final test with configurable parameters.")
 
-# set number of iterations in RandomSearch
-iRS = 25
+# Add arguments
+parser.add_argument('--kernel', type=int, default=1, choices=[1, 3], 
+                    help="Kernel type: 1 for Gaussian, 3 for Matérn(1/2), default=1.")
+parser.add_argument('--prec', type=str, default="chol_greedy", choices=["chol_greedy", "chol_rp", "rff", "nystrom"],
+                    help="Preconditioner type, default='chol_greedy'.")
+parser.add_argument('--rank', type=int, default=200, 
+                    help="Target preconditioner rank, default=200.")
+parser.add_argument('--iRS', type=int, default=25, 
+                    help="Number of iterations in RandomSearch, default=25.")
+parser.add_argument('--mis_thres', type=float, default=0.0, 
+                    help="Mutual information score threshold, default=0.0.")
+parser.add_argument('--window_scheme', type=str, default="mis", choices=["mis", "consec", "random"],
+                    help="Window scheme: 'mis', 'consec', or 'random', default='mis'.")
+parser.add_argument('--weight_scheme', type=str, default="equally weighted", choices=["equally weighted", "no weights"], 
+                    help="Weight scheme: 'equally weighted' or 'no weights'.")
+parser.add_argument('--IPMiter', type=int, default=100, 
+                    help="Maximum number of IPM iterations, default=100.")
+parser.add_argument('--GMRESiter', type=int, default=100, 
+                    help="Maximum number of GMRES iterations, default=100.")
+parser.add_argument('--ipmpar', nargs=3, type=float, default=[0.2, 1e-3, 1e-6], 
+                    help="IPM parameters as a list: [sigma_br, tol, Gtol], default=[0.2, 1e-3, 1e-6].")
+parser.add_argument('--data', nargs='+', type=str, default=["susy", "cod_rna", "higgs"], choices=["susy", "cod_rna", "higgs"], 
+                    help="List of data sets to use, default=['susy', 'cod_rna', 'higgs'].")
+
+# Parse arguments
+args = parser.parse_args()
+
+# Assign the parsed arguments to the parameters
+
+# kernel definition
+kernel = args.kernel
+# preconditioner
+prec = args.prec
+# target preconditioner rank
+Dprec = args.rank
+# number of iterations in RandomSearch
+iRS = args.iRS
 # mutual information score threshold
-mis_thres = 0.0
-# choose window scheme
-window_scheme = "mis"
-#window_scheme = "consec"
-#window_scheme = "random"
-# choose weight scheme
-weight_scheme = "equally weighted"
-#weight_scheme = "no weights"
-# choose target preconditioner rank
-Dprec = 200
-# choose precondioner
-prec = "chol_greedy"
-#prec = "chol_rp"
-#prec = "rff"
-#prec = "nystrom"
-# choose maximum number of IPM iterations
-iter_ip = 100
-# choose maximum number of GMRES iterations
-Gmaxiter = 100
-
-# define ipm parameters: ipmpar=[sigma_br,tol,Gtol]
-ipmpar = [0.2,1e-3,1e-6]
-
-# define list of data sets
-data_sets = ["susy", "cod_rna", "higgs"]
+mis_thres = args.mis_thres
+# window scheme
+window_scheme = args.window_scheme
+# weight scheme
+weight_scheme = args.weight_scheme
+# maximum number of IPM iterations
+iter_ip = args.IPMiter
+# maximum number of GMRES iterations
+Gmaxiter = args.GMRESiter
+# ipm parameters: ipmpar=[sigma_br,tol,Gtol]
+ipmpar = args.ipmpar
+# list of data sets
+if isinstance(args.data, str):
+    data_sets = [args.data]
+else:
+    data_sets = args.data
 
 ####################
 # initialize dict for results
