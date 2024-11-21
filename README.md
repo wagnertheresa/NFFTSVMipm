@@ -10,6 +10,8 @@ This package uses the [FastAdjacency2.0](https://github.com/wagnertheresa/FastAd
 - This software has been tested with Python 3.8.
 - This software depends the FastAdjacency2.0 package. We refer to https://github.com/wagnertheresa/FastAdjacency2.0#readme for installation instructions.
 
+To use this code, run `make` from the terminal. Optionally, run `make check` to test your installation.
+
 ## Usage
 The main file class_NFFTSVMipm.py in the `nfftsvmipm` directory consists of the following two classes:
 
@@ -128,14 +130,7 @@ python test/filename.py [options]
 ### Data sets
 The benchmark datasets used in the numerical results section can be downloaded from the following websites: [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs), [SUSY](https://archive.ics.uci.edu/dataset/279/susy), [cod-rna](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html). The cod-rna data files can be found in the [`data`](https://github.com/wagnertheresa/NFFTSVMipm/tree/main/data) directory of this repository. The HIGGS and SUSY data files exceed the standard size limits of GitHub and should be saved locally in the data folder of this repository.
 
-## Examples
-
-To reproduce the results presented in Figure 2 with the Gaussian kernel, the Cholesky (greedy) preconditioner with target rank 200 on the entire cod-rna data set, run the `run_test_precond_timings.py` script as:
-```bash
-python test/run_test_precond_timings.py --kernel 1 --Ndata 0 --prec "chol_greedy" --rank 200
-```
-
-## Notes
+### Notes
 - Parameter Types:
     * Single values can be passed directly, e.g., `--rank 200`.
     * Lists should be space-separated, e.g., `--rank 50 200 1000`
@@ -144,7 +139,14 @@ python test/run_test_precond_timings.py --kernel 1 --Ndata 0 --prec "chol_greedy
 - Help Menu:
     * Use `--help` to view all arguments and descriptions:
 ```bash
-python filename.py --help
+python test/runfile.py --help
+```
+
+## Examples
+
+To reproduce the results presented in Figure 2 with the Gaussian kernel, the Cholesky (greedy) preconditioner with target rank 200 on the entire cod-rna data set, run the `run_test_precond_timings.py` script as:
+```bash
+python test/run_test_precond_timings.py --kernel 1 --Ndata 0 --prec "chol_greedy" --rank 200
 ```
 
 ## References
