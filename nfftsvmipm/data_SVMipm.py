@@ -13,6 +13,15 @@ import random
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_svmlight_file
 
+###############################################
+# include data folder into the path
+import os
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to the data folder (one level up from the current directory)
+data_dir = os.path.join(current_dir, '..', 'data')
+
 ##################################################################################
 
 # SUSY Dataset
@@ -41,8 +50,10 @@ def susy(num=0):
     y_test : ndarray
         The test target vector incorporating the test labels.
     """
+    # Construct the absolute path to the specific file in the data folder
+    file_path_susy = os.path.join(data_dir, 'SUSY.csv')
     # read dataset
-    df = pd.read_csv("data/SUSY.csv", header=None)
+    df = pd.read_csv(file_path_susy, header=None)
     
     X = df.iloc[:,1:]
     y = df.iloc[:,0]
@@ -106,8 +117,10 @@ def higgs(num=0):
     y_test : ndarray
         The test target vector incorporating the test labels.
     """
+    # Construct the absolute path to the specific file in the data folder
+    file_path_higgs = os.path.join(data_dir, 'HIGGS.csv')
     # read dataset
-    df = pd.read_csv("data/HIGGS.csv", header=None)
+    df = pd.read_csv(file_path_higgs, header=None)
     
     X = df.iloc[:,1:]
     y = df.iloc[:,0]
@@ -174,10 +187,15 @@ def cod_rna(num=0):
     # get the number of samples to be included per class in the training and the test set
     num_cod = int(num/2)
     
-    ## read training and validation data set
-    [X_t,y_t] = load_svmlight_file('data/cod-rna-train.txt')
+    # Construct the absolute path to the specific file in the data folder
+    file_path_cod_train = os.path.join(data_dir, 'cod-rna-train.txt')
+    file_path_cod_val = os.path.join(data_dir, 'cod-rna-val.txt')
+    file_path_cod_test = os.path.join(data_dir, 'cod-rna-test.txt')
     
-    [X_v,y_v] = load_svmlight_file('data/cod-rna-val.txt')
+    ## read training and validation data set
+    [X_t,y_t] = load_svmlight_file(file_path_cod_train)
+    
+    [X_v,y_v] = load_svmlight_file(file_path_cod_val)
     
     # concatenate training and validation set to training data set
     X_train = np.concatenate((X_t.todense(),X_v.todense()), axis=0)
@@ -201,7 +219,7 @@ def cod_rna(num=0):
         y_train = y_train[r_samples_train]
     
     ## read test dataset
-    [X_test,y_test] = load_svmlight_file('data/cod-rna-test.txt')
+    [X_test,y_test] = load_svmlight_file(file_path_cod_test)
     
     X_test = X_test.todense()
 

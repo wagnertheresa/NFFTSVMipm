@@ -13,9 +13,9 @@ from scipy.sparse.linalg import LinearOperator
 
 from scipy.linalg import lu_factor
 
-from kernel_matvec import kernel_matvec
-from hessian_ipm import hessian_ipm_pd
-from precond import SMW_prec
+from .kernel_matvec import kernel_matvec
+from .hessian_ipm import hessian_ipm_pd
+from .precond import SMW_prec
   
 ##################################################################################
 

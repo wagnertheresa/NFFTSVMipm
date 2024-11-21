@@ -11,28 +11,28 @@ This package uses the [FastAdjacency2.0](https://github.com/wagnertheresa/FastAd
 - This software depends the FastAdjacency2.0 package. We refer to https://github.com/wagnertheresa/FastAdjacency2.0#readme for installation instructions.
 
 ## Usage
-The main file class_NFFTSVMipm.py consists of the following two classes:
+The main file class_NFFTSVMipm.py in the `nfftsvmipm` directory consists of the following two classes:
 
 - `NFFTSVMipm` performs a preconditioned interior point method for Support Vector Machines.
 - `RandomSearch` searches on random candidate parameter values for one of the classifiers `NFFTSVMipm` or `LIBSVM`.
 
-To reproduce the results presented in the paper, execute the following files:
+To reproduce the results presented in the paper, execute the following files from the `test` directory:
 
-* [run_test_precond_timings.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/run_test_precond_timings.py) (Figure 2)
-* [run_test_IPMGMRES_iters.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/run_test_IPMGMRES_iters.py) (Figure 3)
-* [run_test_IPMGMRES_tols.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/run_test_IPMGMRES_tols.py) (Table 2)
-* [run_test_dratio.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/run_test_dratio.py) (Table 3)
-* [run_finaltest.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/run_finaltest.py) (Figure/Table 4)
+* [run_test_precond_timings.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/test/run_test_precond_timings.py) (Figure 2)
+* [run_test_IPMGMRES_iters.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/test/run_test_IPMGMRES_iters.py) (Figure 3)
+* [run_test_IPMGMRES_tols.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/test/run_test_IPMGMRES_tols.py) (Table 2)
+* [run_test_dratio.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/test/run_test_dratio.py) (Table 3)
+* [run_finaltest.py](https://github.com/wagnertheresa/NFFTSVMipm/blob/main/test/run_finaltest.py) (Figure/Table 4)
 
 These Python scripts are designed to run configurable tests with various parameters, and allow users to specify these parameters via command-line arguments for maximum flexibility.
 
 To run the scripts in sequence with the default argument values, use the following command:
 ```bash
-python run_all.py
+python test/run_all.py
 ```
 To run the scripts individually, use the following command:
 ```bash
-python filename.py [options]
+python test/filename.py [options]
 ```
 
 ### `run_test_precond_timings.py`
@@ -42,7 +42,7 @@ python filename.py [options]
 | Argument          | Type     | Choices             | Default            | Description                                                                                  |
 |:------------------|:---------|:--------------------|:-------------------|:---------------------------------------------------------------------------------------------|
 | `--kernel`        | `int`    | `1`, `3` | `1` | Specifies the kernel type: `1` for Gaussian kernel, `3` for Matérn(1/2) kernel. |
-| `--Ndata`         | `int`    | Any positive integer or list of integers smaller or equal the size of the data set. | `[10000, 50000, 100000, 0]` | Specifies the subset size(s). Pass a single value or a list, where `0` corresponds to the entire data set (e.g., `10000 50000 100000 0`). |
+| `--Ndata`         | `int`    | Any positive integer or list of integers smaller or equal the size of the data set. | `[100000]` | Specifies the subset size(s). Pass a single value or a list, where `0` corresponds to the entire data set (e.g., `100000`). |
 | `--prec`          | `str`    | `"chol_greedy"`, `"chol_rp"`, `"rff"`, `"nystrom"` | `["chol_greedy", "chol_rp", "rff", "nystrom"]` | Specifies the preconditioner type(s). Pass a single value or a list (e.g., `"chol_greedy" "chol_rp" "rff" "nystrom"`). |
 | `--rank`          | `int`    | Any positive integer or list of integers. | `[50, 200, 1000]` | Specifies the preconditioner rank(s). Pass a single value or a list (e.g., `50 200 1000`). |
 
@@ -113,6 +113,7 @@ python filename.py [options]
 | Argument          | Type     | Choices             | Default            | Description                                                                                  |
 |:------------------|:---------|:--------------------|:-------------------|:---------------------------------------------------------------------------------------------|
 | `--kernel`        | `int`    | `1`, `3` | `1` | Specifies the kernel type: `1` for Gaussian kernel, `3` for Matérn(1/2) kernel. |
+| `--Ndata`         | `int`    | Any positive integer or list of integers smaller or equal the size of the data set. | - | Specifies the subset size(s). Pass a single value or a list (e.g., `1000 5000 10000 50000 100000`). |
 | `--prec`          | `str`    | `"chol_greedy"`, `"chol_rp"`, `"rff"`, `"nystrom"` | `"chol_greedy"` | Specifies the preconditioner type. |
 | `--rank`          | `int`    | Any positive integer. | `200` | Specifies the preconditioner rank. |
 | `--iRS`           | `int`    | Any positive integer. | `25` | Specifies the number of iterations in RandomSearch. |
@@ -125,14 +126,19 @@ python filename.py [options]
 | `--data`          | `str`    | `"susy"`, `"cod-rna"`, `"higgs"` | `["susy", "cod-rna", "higgs"]` | Specifies the data set(s) to use. Pass a single string or a list of strings (e.g., `"susy" "cod-rna" "higgs"`). |
 
 ### Data sets
-The benchmark datasets used in the numerical results section can be downloaded from the following websites: [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs), [SUSY](https://archive.ics.uci.edu/dataset/279/susy), [cod-rna](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html). The cod-rna data files can be found in the [data](https://github.com/wagnertheresa/NFFTSVMipm/tree/main/data) folder of this repository. The HIGGS and SUSY data files exceed the standard size limits of GitHub and should be saved locally in the data folder of this repository.
+The benchmark datasets used in the numerical results section can be downloaded from the following websites: [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs), [SUSY](https://archive.ics.uci.edu/dataset/279/susy), [cod-rna](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html). The cod-rna data files can be found in the [`data`](https://github.com/wagnertheresa/NFFTSVMipm/tree/main/data) directory of this repository. The HIGGS and SUSY data files exceed the standard size limits of GitHub and should be saved locally in the data folder of this repository.
 
 ## Examples
 
+To reproduce the results presented in Figure 2 with the Gaussian kernel, the Cholesky (greedy) preconditioner with target rank 200 on the entire cod-rna data set, run the `run_test_precond_timings.py` script as:
+```bash
+python test/run_test_precond_timings.py --kernel 1 --Ndata 0 --prec "chol_greedy" --rank 200
+```
+
 ## Notes
 - Parameter Types:
-    * Single values can be passed directly, e.g., `--Dprec 100`.
-    * Lists should be space-separated, e.g., `--Dprec 50 200 1000`
+    * Single values can be passed directly, e.g., `--rank 200`.
+    * Lists should be space-separated, e.g., `--rank 50 200 1000`
 - Default Values:
     * If an optional argument is omitted, its default value will be used.
 - Help Menu:

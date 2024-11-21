@@ -12,8 +12,8 @@ import scipy
 import time
 import fastadj2
 
-from precond import pivoted_chol_rp
-from data_preprocessing import data_preprocess
+from .precond import pivoted_chol_rp
+from .data_preprocessing import data_preprocess
 
 ##################################################################################
 

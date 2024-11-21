@@ -8,8 +8,7 @@ by T. Wagner, John W. Pearson, M. Stoll (2023)
 
 Execute this file to reproduce the results presented in Figure 2.
 """
-
-from func_prec_timings import main_precond_timings
+from nfftsvmipm.func_prec_timings import main_precond_timings
 
 ##################################################################################
 ## READ PARSED ARGUMENTS
@@ -22,8 +21,8 @@ parser = argparse.ArgumentParser(description="Run preconditioner timings test wi
 # Add arguments
 parser.add_argument('--kernel', type=int, default=1, choices=[1, 3], 
                     help="Kernel type: 1 for Gaussian, 3 for Matérn(1/2), default=1.")
-parser.add_argument('--Ndata', nargs='+', type=int, default=[10000, 50000, 100000, 0], 
-                    help="List of subset size candidates, where 0 corresponds to the entire data set, default=[10000, 50000, 100000, 0].")
+parser.add_argument('--Ndata', type=int, default=[100000], 
+                    help="List of subset size candidates, where 0 corresponds to the entire data set, default=[100000].")
 parser.add_argument('--prec', nargs='+', type=str, default=["chol_greedy", "chol_rp", "rff", "nystrom"], choices=["chol_greedy", "chol_rp", "rff", "nystrom"],
                     help="List of preconditioner type candidates, default=['chol_greedy', 'chol_rp', 'rff', 'nystrom'].")
 parser.add_argument('--rank', nargs='+', type=int, default=[50, 200, 1000], 
@@ -57,6 +56,20 @@ else:
 
 # choose data set
 data = "cod_rna"
+
+####################
+# include nfftsvmipm folder into the path
+import sys
+import os
+
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to the nfftsvmipm folder (one level up from the current directory)
+nfftsvmipm_dir = os.path.join(current_dir, '..', 'nfftsvmipm')
+
+# Add the home directory to sys.path
+sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results

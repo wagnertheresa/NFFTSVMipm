@@ -11,7 +11,7 @@ Execute this file to reproduce the results presented in Figure 3.
 
 import numpy as np
 
-from class_NFFTSVMipm import RandomSearch
+from nfftsvmipm.class_NFFTSVMipm import RandomSearch
 
 ##################################################################################
 ## READ PARSED ARGUMENTS
@@ -102,6 +102,20 @@ data = args.data
 
 # set number of iterations in RandomSearch
 iRS = 1 # only one run since parameters are fixed
+
+####################
+# include nfftsvmipm folder into the path
+import sys
+import os
+
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to the nfftsvmipm folder (one level up from the current directory)
+nfftsvmipm_dir = os.path.join(current_dir, '..', 'nfftsvmipm')
+
+# Add the home directory to sys.path
+sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results

@@ -11,7 +11,7 @@ Execute this file to reproduce the results presented in Table 2.
 
 import numpy as np
 
-from class_NFFTSVMipm import RandomSearch
+from nfftsvmipm.class_NFFTSVMipm import RandomSearch
 
 ##################################################################################
 ## READ PARSED ARGUMENTS
@@ -89,6 +89,20 @@ data = args.data
 
 # define list of candidates for IPM/GMRES tolerance combination
 tol_list = [[1e-1,1e-4], [1e-2,1e-5], [1e-3,1e-6], [1e-4,1e-7]]
+
+####################
+# include nfftsvmipm folder into the path
+import sys
+import os
+
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to the nfftsvmipm folder (one level up from the current directory)
+nfftsvmipm_dir = os.path.join(current_dir, '..', 'nfftsvmipm')
+
+# Add the home directory to sys.path
+sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results
