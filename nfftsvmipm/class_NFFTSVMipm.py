@@ -265,6 +265,12 @@ class NFFTSVMipm:
             
             Ldec = np.zeros((X_train.shape[0],k))
             
+            # clean the data
+            if np.isnan(L).any() or np.isinf(L).any():
+                L = np.nan_to_num(L)   
+            if np.isnan(AQ).any() or np.isinf(AQ).any():
+                AQ = np.nan_to_num(AQ)
+            
             # Attempt to solve directly
             try:
                 Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
