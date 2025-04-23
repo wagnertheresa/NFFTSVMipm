@@ -220,7 +220,7 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
         L = LL@scipy.linalg.sqrtm(D)
         
         Ldec = np.zeros((X_train.shape[0],k))
-        Ldec=np.linalg.solve(L.T,AQ.T)
+        Ldec=np.linalg.lstsq(L.T,AQ.T)
         Ldec=Ldec.T
 
     ########################

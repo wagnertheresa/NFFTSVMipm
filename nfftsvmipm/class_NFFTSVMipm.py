@@ -264,7 +264,7 @@ class NFFTSVMipm:
             L = LL@scipy.linalg.sqrtm(D)
             
             Ldec = np.zeros((X_train.shape[0],k))
-            Ldec = np.linalg.solve(L.T,AQ.T)
+            Ldec = np.linalg.lstsq(L.T,AQ.T)
             Ldec = Ldec.T
        
         #######################
