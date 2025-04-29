@@ -78,6 +78,12 @@ dict_cholrp = {r: [] for r in rank_list}
 dict_rff = {r: [] for r in rank_list}
 dict_nystr = {r: [] for r in rank_list}
 
+####################
+
+print("\n##############################\n")
+print("Running run_test_precond_timings.py")
+print("\n##############################\n")
+
 for n in Ndata:
     print("Solving for dimension", n)
     ###########################
@@ -131,3 +137,9 @@ for n in Ndata:
             print("dict_cholrp:", dict_cholrp)
             print("dict_rff:", dict_rff)
             print("dict_nystr:", dict_nystr)
+
+####################
+
+print("\n##############################\n")
+print("Finished run_test_precond_timings.py")
+print("\n##############################\n")

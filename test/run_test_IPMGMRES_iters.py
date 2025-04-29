@@ -125,6 +125,12 @@ dict_rff = {r: [] for r in rank_list}
 dict_nystr = {r: [] for r in rank_list}
 
 ####################
+
+print("\n##############################\n")
+print("Running run_test_IPMGMRES_iters.py")
+print("\n##############################\n")
+
+####################
 print("\n####################################################\n")
 print("############################")
 print("Solving for data = ", data)
@@ -226,3 +232,9 @@ for n in Ndata:
             print("dict_cholrp:", dict_cholrp)
             print("dict_rff:", dict_rff)
             print("dict_nystr:", dict_nystr)
+            
+####################
+
+print("\n##############################\n")
+print("Finished run_test_IPMGMRES_iters.py")
+print("\n##############################\n")

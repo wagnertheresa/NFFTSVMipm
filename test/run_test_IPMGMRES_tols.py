@@ -115,6 +115,12 @@ dict_bestpred = {t[0]: [] for t in tol_list}
 
 ####################
 
+print("\n##############################\n")
+print("Running run_test_IPMGMRES_tols.py")
+print("\n##############################\n")
+
+####################
+
 print("\n####################################################\n")
 print("############################")
 print("Solving for data = ", data)
@@ -206,3 +212,9 @@ for n in Ndata:
         print("dict_bestparam", dict_bestparam)
         print("dict_bestfit", dict_bestfit)
         print("dict_bestpred", dict_bestpred)
+
+####################
+
+print("\n##############################\n")
+print("Finished run_test_IPMGMRES_tols.py")
+print("\n##############################\n")

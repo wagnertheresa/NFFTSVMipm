@@ -805,7 +805,7 @@ class RandomSearch:
         #print("\nFirst Parameter:", best_params)
         #print("First Result:", best_result)
         #print("Time Fit:", best_time_fit)
-        if self.classifier == "NFFTSVMipm":
+        #if self.classifier == "NFFTSVMipm":
             #print("GMRESiters:", best_GMRESiter)
             #print("IPMiters:", best_IPMiter)
             #print("time fastadjsetup:", best_time_fastadjsetup)
@@ -845,7 +845,7 @@ class RandomSearch:
             #print("\nNew Parameter:", new_params)
             #print("New Result:", new_result)
             #print("Time Fit:", new_time_fit)
-            if self.classifier == "NFFTSVMipm":
+            #if self.classifier == "NFFTSVMipm":
                 #print("GMRESiter:", new_GMRESiter)
                 #print("IPMiter:", new_IPMiter)
                 #print("time fastadjsetup:", new_time_fastadjsetup)

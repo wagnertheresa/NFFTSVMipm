@@ -110,6 +110,12 @@ lib_dict_bestpred = {d: [] for d in data_sets}
 
 ####################
 
+print("\n##############################\n")
+print("Running run_finaltest.py")
+print("\n##############################\n")
+
+####################
+
 for data in data_sets:
     print("\n####################################################\n")
     print("############################")
@@ -269,3 +275,9 @@ for data in data_sets:
         print("lib_dict_bestparam", lib_dict_bestparam)
         print("lib_dict_bestfit", lib_dict_bestfit)
         print("lib_dict_bestpred", lib_dict_bestpred)
+        
+####################
+
+print("\n##############################\n")
+print("Finished run_finaltest.py")
+print("\n##############################\n")
