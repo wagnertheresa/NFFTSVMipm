@@ -124,7 +124,7 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
     xid = 1 - MATcurrent + lambda_svm * ytrain + mu*1/alpha-mu*1/(C-alpha) # Right hand side first component
     xip = alpha.conj().T @ ytrain # Right hand side second component
 
-    print((eta.T@alpha+eta.T@(C-alpha))/(2*n))
+    #print((eta.T@alpha+eta.T@(C-alpha))/(2*n))
     nrmxid = np.linalg.norm(xid)
     dtol = tol * (1 + np.sqrt(n)) # 1+||c|| in 25 years paper
     nrmxip = np.linalg.norm(xip)
@@ -170,7 +170,7 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
         # break if the GMRES iterations are too large
         # Store number of Gmres iterations taken
         GMRESiter.append(Giter)
-        print("GMRESiters:", GMRESiter, "IPMiters:", i)
+        #print("GMRESiters:", GMRESiter, "IPMiters:", i)
         if Giter>99:
             break;
 
@@ -216,11 +216,11 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
 
         # Line Search Routine
         while (stopCondBackTrack == False and nIterBT < max_iters_BT):
-            print("initial step LS:", step)
+            #print("initial step LS:", step)
             # Compute updated F for new step size
             F_updated = evaluate_F_Newton(alpha+step*dalpha, lambda_svm+step*dlambda, MATcurrent+step*MATupdate, ytrain, C, mu)
-            print("Norm F_current:", np.linalg.norm(F_current))
-            print("Norm F_updated:", np.linalg.norm(F_updated))
+            #print("Norm F_current:", np.linalg.norm(F_current))
+            #print("Norm F_updated:", np.linalg.norm(F_updated))
             # Check if constraints are satisfied
             if (np.linalg.norm(F_updated,ord=np.inf) <= ((1-a_BT*step) * np.linalg.norm(F_current,ord=np.inf))):
                 stopCondBackTrack = True
@@ -231,8 +231,8 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
                     break
                 nIterBT += 1
 
-        print("nIterBT:", nIterBT)
-        print("step:", step)
+        #print("nIterBT:", nIterBT)
+        #print("step:", step)
         
         # END LINE SEARCH
         ##########################################
@@ -259,11 +259,11 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
         xip = alpha.conj().T @ ytrain # Right hand side second component
         nrmxip = np.linalg.norm(xip)
         nrmxid = np.linalg.norm(xid)
-        print("norm of stopping mu:",mu)
-        print("Norm of the xip:", nrmxip, "norm of xid:", nrmxid)
+        #print("norm of stopping mu:",mu)
+        #print("Norm of the xip:", nrmxip, "norm of xid:", nrmxid)
 
         if (nrmxid < dtol):
-            print("\nIPM has converged!\n")
+            #print("\nIPM has converged!\n")
             break
 
     return [alpha, GMRESiter, i]

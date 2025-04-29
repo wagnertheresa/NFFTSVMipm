@@ -32,7 +32,7 @@ def under_sample(X, y):
         y : ndarray
             The corresponding target values of the balanced data.
         """
-        print('Under-Sampling')
+        #print('Under-Sampling')
         # save label for all indices
         idx_pos = []
         idx_neg = []
@@ -78,7 +78,7 @@ def z_score_normalization(Xtrain, Xtest):
     X_test : ndarray
         Z-score normalized test data.
     """
-    print('Z-Score Normalization')
+    #print('Z-Score Normalization')
     
     ## z-score normalization
     

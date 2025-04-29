@@ -273,11 +273,13 @@ class NFFTSVMipm:
             
             # Attempt to solve directly
             try:
-                Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
+                #Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
+                Ldec = scipy.linalg.solve_triangular(L.T,AQ.T)
             # Regularize and retry if it fails
             except Exception:
                 L_reg = L + 1e-8 * np.eye(L.shape[0])
-                Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
+                #Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
+                Ldec = scipy.linalg.solve_triangular(L_reg.T,AQ.T)
             
             Ldec = Ldec.T
        
@@ -286,8 +288,8 @@ class NFFTSVMipm:
         # perform interior point method with line search routine for determining step size
         [alpha_fast, GMRESiter_fast, IPMiter_fast] = svm_ipm_pd_line_search(KER_fast,y_train,self.C,iter_ip,tol,self.sigma_br,Gmaxiter,Gtol,prec,Ldec)
 
-        print("GMRES-iterations in Fastsum:", GMRESiter_fast)
-        print("IPM-iterations in Fastsum:", IPMiter_fast)
+        #print("GMRES-iterations in Fastsum:", GMRESiter_fast)
+        #print("IPM-iterations in Fastsum:", IPMiter_fast)
         
         self.alpha_fast = alpha_fast
         self.Xtrain = X_train
@@ -616,8 +618,8 @@ class RandomSearch:
             
             self.weights = kweights
     
-            print("Windows:", self.windows)
-            print("Weights:", self.weights)
+            #print("Windows:", self.windows)
+            #print("Weights:", self.weights)
         
         return X_train, y_train, X_test
     
@@ -800,13 +802,13 @@ class RandomSearch:
         elif self.classifier == "LIBSVM":
             best_time_fit, best_time_pred, best_result = self.optimize(best_params, X_train, y_train, X_test, y_test)
             
-        print("\nFirst Parameter:", best_params)
-        print("First Result:", best_result)
-        print("Time Fit:", best_time_fit)
+        #print("\nFirst Parameter:", best_params)
+        #print("First Result:", best_result)
+        #print("Time Fit:", best_time_fit)
         if self.classifier == "NFFTSVMipm":
-            print("GMRESiters:", best_GMRESiter)
-            print("IPMiters:", best_IPMiter)
-            print("time fastadjsetup:", best_time_fastadjsetup)
+            #print("GMRESiters:", best_GMRESiter)
+            #print("IPMiters:", best_IPMiter)
+            #print("time fastadjsetup:", best_time_fastadjsetup)
         
         total_time_fit.append(best_time_fit)
         total_time_pred.append(best_time_pred)
@@ -840,13 +842,13 @@ class RandomSearch:
             else:
                 new_result = [0,0,0]
             
-            print("\nNew Parameter:", new_params)
-            print("New Result:", new_result)
-            print("Time Fit:", new_time_fit)
+            #print("\nNew Parameter:", new_params)
+            #print("New Result:", new_result)
+            #print("Time Fit:", new_time_fit)
             if self.classifier == "NFFTSVMipm":
-                print("GMRESiter:", new_GMRESiter)
-                print("IPMiter:", new_IPMiter)
-                print("time fastadjsetup:", new_time_fastadjsetup)
+                #print("GMRESiter:", new_GMRESiter)
+                #print("IPMiter:", new_IPMiter)
+                #print("time fastadjsetup:", new_time_fastadjsetup)
             
             if self.scoring == "accuracy":
                 if new_result[0] > best_result[0]:
