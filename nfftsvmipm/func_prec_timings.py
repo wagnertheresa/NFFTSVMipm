@@ -229,13 +229,11 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
         
         # Attempt to solve directly
         try:
-            #Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
-            Ldec = scipy.linalg.solve_triangular(L.T,AQ.T)
+            Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
         # Regularize and retry if it fails
         except Exception:
             L_reg = L + 1e-8 * np.eye(L.shape[0])
-            #Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
-            Ldec = scipy.linalg.solve_triangular(L.T,AQ.T)
+            Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
         
         Ldec = Ldec.T
 
