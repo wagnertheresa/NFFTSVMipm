@@ -259,7 +259,7 @@ class NFFTSVMipm:
                 AQ[:,j] = KER_fast(Q[:,j])    
                 
 
-            QaAQ = Q.T @ AQ + 1e0 * np.eye(L.shape[0])
+            QaAQ = Q.T @ AQ + 1e-4 * np.eye(L.shape[0])
             
             # compute LDL^T decomposition
             LL, D, per = scipy.linalg.ldl(QaAQ)
