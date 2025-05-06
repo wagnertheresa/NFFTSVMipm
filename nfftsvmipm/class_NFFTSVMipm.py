@@ -246,7 +246,7 @@ class NFFTSVMipm:
             # setup Nyström decomposition
             k = self.D_prec
             G = np.random.randn(X_train.shape[0],k)
-            print(G)
+            print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
             Y_ny = np.zeros((G.shape))
             for i in range(k):
                 Y_ny[:,i] = KER_fast(G[:,i])
