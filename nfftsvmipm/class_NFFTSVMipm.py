@@ -203,6 +203,7 @@ class NFFTSVMipm:
         #####################
         ## PRECONDITIONING
         #####################
+        print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
         # pivoted Cholesky (greedy)
         if prec == "chol_greedy":
             MM = self.D_prec
