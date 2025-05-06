@@ -246,7 +246,7 @@ class NFFTSVMipm:
             # setup Nyström decomposition
             k = self.D_prec
             G = np.random.randn(X_train.shape[0],k)
-            
+            print(G)
             Y_ny = np.zeros((G.shape))
             for i in range(k):
                 Y_ny[:,i] = KER_fast(G[:,i])
@@ -263,17 +263,14 @@ class NFFTSVMipm:
             
             # compute LDL^T decomposition
             LL, D, per = scipy.linalg.ldl(QaAQ)
-            D = D.clip(min = 1e-2)
+            D = D.clip(min = 1e-1)
             L = LL@scipy.linalg.sqrtm(D)
-            
             Ldec = np.zeros((X_train.shape[0],k))
-            
             # clean the data
             if np.isnan(L).any() or np.isinf(L).any():
                 L = np.nan_to_num(L)   
             if np.isnan(AQ).any() or np.isinf(AQ).any():
                 AQ = np.nan_to_num(AQ)
-            
             # Attempt to solve directly
             try:
                 Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
@@ -281,7 +278,7 @@ class NFFTSVMipm:
             except Exception:
                 L_reg = L + 1e-8 * np.eye(L.shape[0])
                 Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
-            
+
             Ldec = Ldec.T
        
         #######################
