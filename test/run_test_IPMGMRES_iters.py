@@ -191,8 +191,6 @@ for n in Ndata:
 
     	        # setup RandomSearch model for SVMipm classifier
                 model = RandomSearch(classifier="NFFTSVMipm", kernel=kernel, lb=[lb_sigma,lb_C], ub=[ub_sigma, ub_C], max_iter_rs=iRS, mis_threshold=mis_thres, window_scheme=window_scheme, d_ratio=dr, weight_scheme=weight_scheme, sigma_br=ipmpar[0], D_prec=D_prec, prec=prec, iter_ip=iter_ip, tol=ipmpar[1], Gmaxiter=Gmaxiter, Gtol=ipmpar[2])
-
-                print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
     	        ## run classification task
                 results_ipm = model.tune(X_train, y_train, X_test, y_test)
                 print("\nRandomSearch for NFFTSVMipm")
