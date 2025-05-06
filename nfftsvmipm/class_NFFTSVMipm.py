@@ -15,7 +15,7 @@ import time
 import scipy
 
 import fastadj2
-imp
+
 from sklearn.feature_selection import mutual_info_classif
 from libsvm import svmutil
 
@@ -243,44 +243,50 @@ class NFFTSVMipm:
         # Nyström decomposition
         elif prec == "nystrom":
             
+
             # setup Nyström decomposition
             k = self.D_prec
-            G = np.random.randn(X_train.shape[0],k)
-            print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
-            Y_ny = np.zeros((G.shape))
-            for i in range(k):
-                Y_ny[:,i] = KER_fast(G[:,i])
-            Q = np.linalg.qr(Y_ny)[0]
-            
-            AQ = np.zeros((Q.shape))
-            print(k)
-            for j in range(k):
-                print(j)
-                AQ[:,j] = KER_fast(Q[:,j])    
-                
+            print("nystrom rocks!")
+            ell = k+10
+            G = np.random.randn(X_train.shape[0],ell)
 
-            QaAQ = Q.T @ AQ + 1e-4 * np.eye(L.shape[0])
-            
-            # compute LDL^T decomposition
-            LL, D, per = scipy.linalg.ldl(QaAQ)
-            D = D.clip(min = 1e-1)
-            L = LL@scipy.linalg.sqrtm(D)
-            Ldec = np.zeros((X_train.shape[0],k))
-            # clean the data
-            if np.isnan(L).any() or np.isinf(L).any():
-                L = np.nan_to_num(L)   
-            if np.isnan(AQ).any() or np.isinf(AQ).any():
-                AQ = np.nan_to_num(AQ)
-            # Attempt to solve directly
-            try:
-                Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
-            # Regularize and retry if it fails
-            except Exception:
-                L_reg = L + 1e-8 * np.eye(L.shape[0])
-                Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
+            AQ = np.zeros((G.shape))
+            for j in range(ell):
+                AQ[:,j] = KER_fast(G[:,j])
 
-            Ldec = Ldec.T
-       
+            nu = math.sqrt(X_train.shape[0])*1e-7*np.linalg.norm(AQ)
+            Ynu = AQ+nu*G
+            QaAQ = G.T @ Ynu
+            L = scipy.linalg.cholesky(QaAQ, lower=True)
+            B = scipy.linalg.solve_triangular(L.T, Ynu.T, lower=False).T
+            U, S, Vh = np.linalg.svd(B,full_matrices=False)
+            Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)
+            Ldec = U[:,:k]@np.sqrt(Lambda_diag[:k,:k])
+            # Y_ny = np.zeros((G.shape))
+            # for i in range(k):
+            #     Y_ny[:,i] = KER_fast(G[:,i])
+            # Q = np.linalg.qr(Y_ny)[0]
+
+            # # compute LDL^T decomposition
+            # LL, D, per = scipy.linalg.ldl(QaAQ)
+            # # D = D.clip(min = 1e-1)
+            # L = LL@scipy.linalg.sqrtm(D)
+            # Ldec = np.zeros((X_train.shape[0],k))
+            # # clean the data
+            # if np.isnan(L).any() or np.isinf(L).any():
+            #     L = np.nan_to_num(L)
+            # if np.isnan(AQ).any() or np.isinf(AQ).any():
+            #     AQ = np.nan_to_num(AQ)
+            # # Attempt to solve directly
+            # try:
+            #     Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
+            # # Regularize and retry if it fails
+            # except Exception:
+            #     L_reg = L + 1e-8 * np.eye(L.shape[0])
+            #     Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
+            #
+            # Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
+            # Ldec = Ldec.T
         #######################
 
         # perform interior point method with line search routine for determining step size
