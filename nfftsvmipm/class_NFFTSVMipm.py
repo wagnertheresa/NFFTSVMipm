@@ -203,7 +203,6 @@ class NFFTSVMipm:
         #####################
         ## PRECONDITIONING
         #####################
-        print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
         # pivoted Cholesky (greedy)
         if prec == "chol_greedy":
             MM = self.D_prec
@@ -657,6 +656,7 @@ class RandomSearch:
             
             clf = NFFTSVMipm(sigma=params[0], C=params[1], indiv_sig=self.indiv_sig, D_prec=self.D_prec, sigma_br=self.sigma_br, windows=self.windows, weights=self.weights, kernel=self.kernel)
         
+        print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
             alpha, GMRESiter, IPMiter, time_fastadjsetup = clf.fit(X_train, y_train, self.prec, self.iter_ip, self.tol, self.Gmaxiter, self.Gtol)
             
             time_fit = time.time() - start_fit
