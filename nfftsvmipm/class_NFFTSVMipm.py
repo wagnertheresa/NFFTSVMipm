@@ -409,8 +409,6 @@ class RandomSearch:
         self.Gmaxiter = Gmaxiter
         self.Gtol = Gtol
         self.scoring = scoring
-        print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
-
         
     #############################################################################
         
@@ -655,6 +653,7 @@ class RandomSearch:
         if self.classifier == "NFFTSVMipm":
             # measure fitting time
             start_fit = time.time()
+            print("---------------------------blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa====================================================")
             clf = NFFTSVMipm(sigma=params[0], C=params[1], indiv_sig=self.indiv_sig, D_prec=self.D_prec, sigma_br=self.sigma_br, windows=self.windows, weights=self.weights, kernel=self.kernel)
         
             alpha, GMRESiter, IPMiter, time_fastadjsetup = clf.fit(X_train, y_train, self.prec, self.iter_ip, self.tol, self.Gmaxiter, self.Gtol)
