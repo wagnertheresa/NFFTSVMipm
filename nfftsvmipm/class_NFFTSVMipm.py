@@ -254,7 +254,7 @@ class NFFTSVMipm:
             for j in range(ell):
                 AQ[:,j] = KER_fast(G[:,j])
 
-            nu = math.sqrt(X_train.shape[0])*1e-7*np.linalg.norm(AQ)
+            nu = math.sqrt(X_train.shape[0])*1e-4*np.linalg.norm(AQ)
             Ynu = AQ+nu*G
             QaAQ = G.T @ Ynu
             L = scipy.linalg.cholesky(QaAQ, lower=True)
