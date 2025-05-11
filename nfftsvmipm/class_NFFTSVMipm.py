@@ -262,31 +262,6 @@ class NFFTSVMipm:
             U, S, Vh = np.linalg.svd(B,full_matrices=False)
             Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)
             Ldec = U[:,:k]@np.sqrt(Lambda_diag[:k,:k])
-            # Y_ny = np.zeros((G.shape))
-            # for i in range(k):
-            #     Y_ny[:,i] = KER_fast(G[:,i])
-            # Q = np.linalg.qr(Y_ny)[0]
-
-            # # compute LDL^T decomposition
-            # LL, D, per = scipy.linalg.ldl(QaAQ)
-            # # D = D.clip(min = 1e-1)
-            # L = LL@scipy.linalg.sqrtm(D)
-            # Ldec = np.zeros((X_train.shape[0],k))
-            # # clean the data
-            # if np.isnan(L).any() or np.isinf(L).any():
-            #     L = np.nan_to_num(L)
-            # if np.isnan(AQ).any() or np.isinf(AQ).any():
-            #     AQ = np.nan_to_num(AQ)
-            # # Attempt to solve directly
-            # try:
-            #     Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
-            # # Regularize and retry if it fails
-            # except Exception:
-            #     L_reg = L + 1e-8 * np.eye(L.shape[0])
-            #     Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
-            #
-            # Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
-            # Ldec = Ldec.T
         #######################
 
         # perform interior point method with line search routine for determining step size
