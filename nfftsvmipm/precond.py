@@ -52,7 +52,7 @@ def pivoted_chol_rp(k, KER, n, alg):
         F[i,:] = (rows[i,:] - F[:i,idx].T @ F[:i,:]) / np.sqrt(diags[idx])
         diags -= F[i,:]**2
         diags = diags.clip(min = 0)
-        
+
         if np.max(diags) < 1e-3:
             break
         
@@ -157,7 +157,6 @@ def get_row(i, KER, n):
     """
     ei = np.zeros(n,)
     ei[i] = 1
-    
     row = np.transpose(KER(ei))
     return row
     

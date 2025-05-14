@@ -248,20 +248,22 @@ class NFFTSVMipm:
             k = self.D_prec
             # print("nystrom rocks!")
             ell = k+10
+            t = time.time()
             G = np.random.randn(X_train.shape[0],ell)
-
             AQ = np.zeros((G.shape))
             for j in range(ell):
                 AQ[:,j] = KER_fast(G[:,j])
-
-            nu = math.sqrt(X_train.shape[0])*1e-2*np.linalg.norm(AQ)
+            nu = math.sqrt  (X_train.shape[0])*1e-2*np.linalg.norm(AQ)
             Ynu = AQ+nu*G
             QaAQ = G.T @ Ynu
+            print("elapsed first:",time.time() - t)
+            t = time.time()
             L = scipy.linalg.cholesky(QaAQ, lower=True)
             B = scipy.linalg.solve_triangular(L.T, Ynu.T, lower=False).T
             U, S, Vh = np.linalg.svd(B,full_matrices=False)
             Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)
             Ldec = U[:,:k]@np.sqrt(Lambda_diag[:k,:k])
+            print("elapsed first:",time.time() - t)
         #######################
 
         # perform interior point method with line search routine for determining step size

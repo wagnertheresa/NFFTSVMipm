@@ -165,7 +165,7 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
         PCx= lambda x : SMW_prec(x, n, Ldec, ytrain, DD, test, lu, piv)
         M = LinearOperator((n+1,n+1), PCx)
 
-        [dx,flag] = scipy.sparse.linalg.gmres(A=A, b=rhs, tol=Gtol, restart=Gmaxiter, maxiter=1, M=M, callback=callback_gmres, callback_type='pr_norm')
+        [dx,flag] = scipy.sparse.linalg.gmres(A=A, b=rhs, rtol=Gtol, restart=Gmaxiter, maxiter=1, M=M, callback=callback_gmres, callback_type='pr_norm')
 
         # break if the GMRES iterations are too large
         # Store number of Gmres iterations taken

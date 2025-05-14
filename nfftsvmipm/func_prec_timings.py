@@ -11,6 +11,7 @@ import numpy as np
 import scipy
 import time
 import fastadj2
+import math
 
 from .precond import pivoted_chol_rp
 from .data_preprocessing import data_preprocess
@@ -166,17 +167,14 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
     if prec == "chol_greedy":
         MM = D_prec
         n = len(y_train)
-
         Ldec = pivoted_chol_rp(MM,KER_fast,n,"greedy")
-        
     ########################
     # pivoted Cholesky (rp)
     elif prec == "chol_rp":
         MM = D_prec
         n = len(y_train)
-
         Ldec = pivoted_chol_rp(MM,KER_fast,n,"rp")
-        
+
     ######################
     # random Fourier features
     elif prec == "rff":
@@ -202,40 +200,24 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
     # Nyström decomposition
     elif prec == "nystrom":
         k = D_prec
-        G = np.random.randn(X_train.shape[0],k)
-        
-        Y_ny = np.zeros((G.shape))
-        for i in range(k):
-            Y_ny[:,i] = KER_fast(G[:,i])
-        Q = np.linalg.qr(Y_ny)[0]
-        
-        AQ = np.zeros((Q.shape))
-        for j in range(k):
-            AQ[:,j] = KER_fast(Q[:,j])    
-            
-        QaAQ = Q.T @ AQ
 
-        LL, D, per = scipy.linalg.ldl(QaAQ)
-        D = D.clip(min = 1e-2)
-        L = LL@scipy.linalg.sqrtm(D)
-        
-        Ldec = np.zeros((X_train.shape[0],k))
-        
-        # clean the data
-        if np.isnan(L).any() or np.isinf(L).any():
-            L = np.nan_to_num(L)   
-        if np.isnan(AQ).any() or np.isinf(AQ).any():
-            AQ = np.nan_to_num(AQ)
-        
-        # Attempt to solve directly
-        try:
-            Ldec = scipy.linalg.lstsq(L.T,AQ.T)[0]
-        # Regularize and retry if it fails
-        except Exception:
-            L_reg = L + 1e-8 * np.eye(L.shape[0])
-            Ldec = scipy.linalg.lstsq(L_reg.T,AQ.T)[0]
-        
-        Ldec = Ldec.T
+        # setup Nyström decomposition
+        ell = k+10
+        G = np.random.randn(X_train.shape[0],ell)
+        AQ = np.zeros((G.shape))
+        for j in range(ell):
+            AQ[:,j] = KER_fast(G[:,j])
+        nu = math.sqrt(X_train.shape[0])*1e-2*np.linalg.norm(AQ)
+        Ynu = AQ+nu*G
+        QaAQ = G.T @ Ynu
+        L = scipy.linalg.cholesky(QaAQ, lower=True)
+        B = scipy.linalg.solve_triangular(L.T, Ynu.T, lower=False).T
+        U, S, Vh = np.linalg.svd(B,full_matrices=False)
+        Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)
+        dgs=np.diag(Lambda_diag)
+        keep_indices = np.where(dgs/dgs[0] > 1e-3)[0]
+        keep_indices = keep_indices[-1]
+        Ldec = U[:,:keep_indices]@np.sqrt(Lambda_diag[:keep_indices,:keep_indices])
 
     ########################
     
