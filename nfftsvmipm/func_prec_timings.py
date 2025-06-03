@@ -219,6 +219,7 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
         keep_indices = keep_indices[-1]
         Ldec = U[:,:keep_indices]@np.sqrt(Lambda_diag[:keep_indices,:keep_indices])
 
+
     ########################
     
     # stop timing preconditioner setup
