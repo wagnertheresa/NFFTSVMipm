@@ -165,7 +165,6 @@ for n in Ndata:
     
     for prec in prec_list:
         print("Solving for preconditioner", prec)
-        
         for D_prec in rank_list:
             print("Solving for rank", D_prec)
     
