@@ -119,10 +119,10 @@ sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results
-dict_cholgr = {r: [] for r in rank_list}
-dict_cholrp = {r: [] for r in rank_list}
+dict_cholesky_greedy = {r: [] for r in rank_list}
+dict_cholesky_rp = {r: [] for r in rank_list}
 dict_rff = {r: [] for r in rank_list}
-dict_nystr = {r: [] for r in rank_list}
+dict_nystrom = {r: [] for r in rank_list}
 
 ####################
 
@@ -169,9 +169,9 @@ for n in Ndata:
         for D_prec in rank_list:
             print("Solving for rank", D_prec)
     
-            acc = []
-            ipmiters = []
-            gmresiters = []
+            accuracy = []
+            ipm_iterations = []
+            mean_gmres_iterations = []
     
             for S in Slist:
                 print("\n####################################################\n")
@@ -210,19 +210,19 @@ for n in Ndata:
                 print("Best GMRESiter:", results_ipm[7])
                 print("Mean GMRESiter:", results_ipm[8])
                 
-                acc.append(results_ipm[1][0])
-                ipmiters.append(results_ipm[9])
-                gmresiters.append(np.mean(results_ipm[7]))
+                accuracy.append(results_ipm[1][0])
+                ipm_iterations.append(results_ipm[9])
+                mean_gmres_iterations.append(np.mean(results_ipm[7]))
 	    
     	    # save values to dict
             if prec == "chol_greedy":
-                dict_cholgr[D_prec].append([acc,ipmiters,gmresiters])
+                dict_cholesky_greedy[D_prec].append([accuracy,ipm_iterations,mean_gmres_iterations])
             elif prec == "chol_rp":
-                dict_cholrp[D_prec].append([acc,ipmiters,gmresiters])
+                dict_cholesky_rp[D_prec].append([accuracy,ipm_iterations,mean_gmres_iterations])
             elif prec == "rff":
-                dict_rff[D_prec].append([acc,ipmiters,gmresiters])
+                dict_rff[D_prec].append([accuracy,ipm_iterations,mean_gmres_iterations])
             elif prec == "nystrom":
-                dict_nystr[D_prec].append([acc,ipmiters,gmresiters])
+                dict_nystrom[D_prec].append([accuracy,ipm_iterations,mean_gmres_iterations])
         	    
             #################################################################################
             #################################################################################
@@ -230,10 +230,10 @@ for n in Ndata:
             print("\n########################################################################")
             print("\nResults NFFTSVMipm:")
             print("------------------------\n")
-            print("dict_cholgr:", dict_cholgr)
-            print("dict_cholrp:", dict_cholrp)
-            print("dict_rff:", dict_rff)
-            print("dict_nystr:", dict_nystr)
+            print("cholesky_greedy:", dict_cholesky_greedy)
+            print("cholesky_rp:", dict_cholesky_rp)
+            print("rff:", dict_rff)
+            print("nystrom:", dict_nystrom)
             
 ####################
 

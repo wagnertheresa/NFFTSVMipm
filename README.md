@@ -39,6 +39,8 @@ python test/filename.py [options]
 
 ### `run_test_precond_timings.py`
 
+For a given list of subset sizes for a list of data sets, the script iterates over different preconditioners and preconditioner ranks for given feature windows, length-scales and margin value.
+
 #### Arguments
 
 | Argument          | Type     | Choices             | Default            | Description                                                                                  |
@@ -48,7 +50,14 @@ python test/filename.py [options]
 | `--prec`          | `str`    | `"chol_greedy"`, `"chol_rp"`, `"rff"`, `"nystrom"` | `["chol_greedy", "chol_rp", "rff", "nystrom"]` | Specifies the preconditioner type(s). Pass a single value or a list (e.g., `"chol_greedy" "chol_rp" "rff" "nystrom"`). |
 | `--rank`          | `int`    | Any positive integer or list of integers. | `[50, 200, 1000]` | Specifies the preconditioner rank(s). Pass a single value or a list (e.g., `50 200 1000`). |
 
+#### Output format
+For every preconditioner considered on the specified data set, list of subset sizes [n1,n2,n3] and different preconditioner ranks [rank1,rank2,rank3], the output is of the following format:
+
+preconditioner_name: {rank1: [precond_time n1, precond_time n2, precond_time n3], rank2: [precond_time n1, precond_time n2, precond_time n3], rank3: [precond_time n1, precond_time n2, precond_time n3]}
+
 ### `run_test_IPMGMRES_iters.py`
+
+The script iterates over different preconditioners and preconditioner ranks for different length-scale parameter values for a given list of subset sizes for a specified data set.
 
 #### Arguments
 
@@ -69,7 +78,14 @@ python test/filename.py [options]
 | `--dratio`        | `float`  | Any float from (0,1]. | `1.0` | Specifies the proportion of features to include. |
 | `--data`          | `str`    | `"susy"`, `"cod-rna"`, `"higgs"` | `"cod-rna"` | Specifies the data set to use. |
 
+#### Output format
+For every preconditioner considered on the specified data set and subset size for different ranks [rank1,rank2,ranks3] and length-scale parameters [ell1,ell2,ell3,ell4,ell5], the output is of the following format:
+
+preconditioner_name: {rank1: [[accuracy ell1, accuracy ell2, accuracy ell3, accuracy ell4, accuracy ell5], [ipm_iterations ell1, ipm_iterations ell2, ipm_iterations ell3, ipm_iterations ell4, ipm_iterations ell5], [mean_gmres_iterations ell1, mean_gmres_iterations ell2, mean_gmres_iterations ell3, mean_gmres_iterations ell4, mean_gmres_iterations ell5]], rank2: [[accuracy ell1, accuracy ell2, accuracy ell3, accuracy ell4, accuracy ell5], [ipm_iterations ell1, ipm_iterations ell2, ipm_iterations ell3, ipm_iterations ell4, ipm_iterations ell5], [mean_gmres_iterations ell1, mean_gmres_iterations ell2, mean_gmres_iterations ell3, mean_gmres_iterations ell4, mean_gmres_iterations ell5]], rank3: [[accuracy ell1, accuracy ell2, accuracy ell3, accuracy ell4, accuracy ell5], [ipm_iterations ell1, ipm_iterations ell2, ipm_iterations ell3, ipm_iterations ell4, ipm_iterations ell5], [mean_gmres_iterations ell1, mean_gmres_iterations ell2, mean_gmres_iterations ell3, mean_gmres_iterations ell4, mean_gmres_iterations ell5]]}
+
 ### `run_test_IPMGMRES_tols.py`
+
+The script iterates over different IPM and GMRES convergence tolerances for a given preconditioner and preconditioner rank and a list of subset sizes for a specified data set.
 
 #### Arguments
 
@@ -89,7 +105,17 @@ python test/filename.py [options]
 | `--dratio`        | `float`  | Any float from (0,1]. | `1.0` | Specifies the proportion of features to include. |
 | `--data`          | `str`    | `"susy"`, `"cod-rna"`, `"higgs"` | `"cod-rna"` | Specifies the data set to use. |
 
+#### Output format
+For every IPM/GMRES tolerance pair [IPM_tol,GMRES_tol] considered on the specified preconditioner, preconditioner rank, data set and list of subset sizes [n1,n2,n3], the output is of the following format:
+
+accuracy: {IPM_tol1: [accuracy n1, accuracy n2, accuracy n3], IPM_tol2: [accuracy n1, accuracy n2, accuracy n3], IPM_tol3: [accuracy n1, accuracy n2, accuracy n3]}
+
+In addition to accuracy, the number of IPM iterations, the mean number of GMRES iterations, the parameters, the time for fitting the model and the time for predicting from the trained model (of the random search run generating the largest accuracy) are returned.
+All returned metrics follow the output format shown above.
+
 ### `run_test_dratio.py`
+
+The script iterates over three different dimensionality reduction settings (`d_ratio=1`, `d_ratio=2/3`, `d_ratio=1/3`) for a given preconditioner and preconditioner rank and a list of subset sizes for a given list of data sets. Further, it runs the LIBSVM model on the entire feature space in comparison.
 
 #### Arguments
 
@@ -109,7 +135,17 @@ python test/filename.py [options]
 | `--dratio`        | `float`  | Any float from (0,1] or list of floats from (0,1]. | `[1/3, 2/3, 1.0]` | Specifies the proportion(s) of features to include. Pass a single value or a list (e.g., `1/3 2/3 1`). |
 | `--data`          | `str`    | `"susy"`, `"cod-rna"`, `"higgs"` | `["susy", "cod-rna", "higgs"]` | Specifies the data set(s) to use. Pass a single string or a list of strings (e.g., `"susy" "cod-rna" "higgs"`). |
 
+#### Output format
+For the dimensionality reduction ratios [dr1,dr2,dr3] considered on the specified preconditioner, preconditioner rank, data sets [data1,data2,data3] and list of subset sizes [n1,n2,n3], the output of the NFFTSVMipm model is of the following format:
+
+accuracy: {data1: [[accuracy dr1 n1, accuracy dr2 n1, accuracy dr3 n1],[accuracy dr1 n2, accuracy dr2 n2, accuracy dr3 n2],[accuracy dr1 n3, accuracy dr2 n3, accuracy dr3 n3]], data2: [[accuracy dr1 n1, accuracy dr2 n1, accuracy dr3 n1],[accuracy dr1 n2, accuracy dr2 n2, accuracy dr3 n2],[accuracy dr1 n3, accuracy dr2 n3, accuracy dr3 n3]], data3: [[accuracy dr1 n1, accuracy dr2 n1, accuracy dr3 n1],[accuracy dr1 n2, accuracy dr2 n2, accuracy dr3 n2],[accuracy dr1 n3, accuracy dr2 n3, accuracy dr3 n3]]}
+
+In addition to accuracy, the number of IPM iterations, the mean number of GMRES iterations, the parameters, the time for fitting the model and the time for predicting from the trained model (of the random search run generating the largest accuracy) are returned.
+For the LIBSVM model, the accuracy, the parameters, the time for fitting the model and the time for predicting from the trained model are returned.
+All returned metrics follow the output format shown above.
+
 ### `run_finaltest.py`
+The script iterates over a list of data sets and subset sizes for two different kernel_types, for a given preconditioner and preconditioner rank and fixed dimensionality reduction ratios for the data sets. Further, it runs the LIBSVM model on the entire feature space in comparison.
 
 #### Arguments
 | Argument          | Type     | Choices             | Default            | Description                                                                                  |
@@ -126,6 +162,15 @@ python test/filename.py [options]
 | `--GMRESiter`     | `int`    | Any positive integer. | `100` | Specifies the maximum number of GMRES iterations. |
 | `--ipmpar`        | `float`  | List of 3 float values. | `[0.2, 1e-3, 1e-6]` | A list of three values specifying the IPM parameters: `[sigma_br, tol, Gtol]`. |
 | `--data`          | `str`    | `"susy"`, `"cod-rna"`, `"higgs"` | `["susy", "cod-rna", "higgs"]` | Specifies the data set(s) to use. Pass a single string or a list of strings (e.g., `"susy" "cod-rna" "higgs"`). |
+
+#### Output format
+For a list of data sets [data1,data2,data3] and subset sizes [n1,n2,n3] considered on the specified preconditioner, preconditioner rank and dimensionality reduction ratios for the respective data sets, the output is of the following format:
+
+accuracy: {data1: [accuracy n1, accuracy n2, accuracy n3], data2: [accuracy n1, accuracy n2, accuracy n3], data3: [accuracy n1, accuracy n2, accuracy n3]}
+
+In addition to accuracy, the number of IPM iterations, the mean number of GMRES iterations, the parameters, the time for fitting the model and the time for predicting from the trained model (of the random search run generating the largest accuracy) are returned.
+For the LIBSVM model, the accuracy, the parameters, the time for fitting the model and the time for predicting from the trained model are returned.
+All returned metrics follow the output format shown above.
 
 ### Data sets
 The benchmark datasets used in the numerical results section can be downloaded from the following websites: [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs), [SUSY](https://archive.ics.uci.edu/dataset/279/susy), [cod-rna](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html). The cod-rna data files can be found in the [`data`](https://github.com/wagnertheresa/NFFTSVMipm/tree/main/data) directory of this repository. The HIGGS and SUSY data files exceed the standard size limits of GitHub and should be saved locally in the data folder of this repository.

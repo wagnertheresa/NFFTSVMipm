@@ -94,16 +94,16 @@ sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results
-dict_acc = {d: [] for d in data_sets}
+dict_accuracy = {d: [] for d in data_sets}
 dict_ipmiters = {d: [] for d in data_sets}
-dict_gmresiters = {d: [] for d in data_sets}
+dict_mean_gmresiters = {d: [] for d in data_sets}
 dict_timefastadjsetup = {d: [] for d in data_sets}
 dict_bestparam = {d: [] for d in data_sets}
 dict_bestfit = {d: [] for d in data_sets}
 dict_bestpred = {d: [] for d in data_sets}
 
 # initialize dict for LIBSVM results
-lib_dict_acc = {d: [] for d in data_sets}
+lib_dict_accuracy = {d: [] for d in data_sets}
 lib_dict_bestparam = {d: [] for d in data_sets}
 lib_dict_bestfit = {d: [] for d in data_sets}
 lib_dict_bestpred = {d: [] for d in data_sets}
@@ -206,9 +206,9 @@ for data in data_sets:
         print("Best Time fastadjsetup:", results_ipm[10])
 	    
 	    # save values to dict
-        dict_acc[data].append((results_ipm[1])[0])
+        dict_accuracy[data].append((results_ipm[1])[0])
         dict_ipmiters[data].append(results_ipm[9])
-        dict_gmresiters[data].append(np.mean(results_ipm[7]))
+        dict_mean_gmresiters[data].append(np.mean(results_ipm[7]))
         dict_timefastadjsetup[data].append(results_ipm[10])
         dict_bestparam[data].append(results_ipm[0])
         dict_bestfit[data].append(results_ipm[2])
@@ -216,13 +216,13 @@ for data in data_sets:
         
         print("\nResults NFFTSVMipm:")
         print("------------------------\n")
-        print("dict_acc:", dict_acc)
-        print("dict_ipmiters:", dict_ipmiters)
-        print("dict_gmresiters:", dict_gmresiters)
-        print("dict_timefastadjsetup:", dict_timefastadjsetup)
-        print("dict_bestparam", dict_bestparam)
-        print("dict_bestfit", dict_bestfit)
-        print("dict_bestpred", dict_bestpred)
+        print("accuracy:", dict_accuracy)
+        print("ipm_iterations:", dict_ipmiters)
+        print("mean_gmres_iterations:", dict_mean_gmresiters)
+        print("time_fastadj_setup:", dict_timefastadjsetup)
+        print("best_parameters:", dict_bestparam)
+        print("best_timefit:", dict_bestfit)
+        print("best_time_predict:", dict_bestpred)
         
 #################################################################################
 	
@@ -251,7 +251,7 @@ for data in data_sets:
         print("Mean Total Runtime:", results_libsvm[4] + results_libsvm[5])
 
     	# save values to dict
-        lib_dict_acc[data].append((results_libsvm[1])[0])
+        lib_dict_accuracy[data].append((results_libsvm[1])[0])
         lib_dict_bestparam[data].append(results_libsvm[0])
         lib_dict_bestfit[data].append(results_libsvm[2])
         lib_dict_bestpred[data].append(results_libsvm[3])
@@ -263,20 +263,20 @@ for data in data_sets:
         
         print("\nResults NFFTSVMipm:")
         print("------------------------\n")
-        print("dict_acc:", dict_acc)
-        print("dict_ipmiters:", dict_ipmiters)
-        print("dict_gmresiters:", dict_gmresiters)
-        print("dict_timefastadjsetup:", dict_timefastadjsetup)
-        print("dict_bestparam", dict_bestparam)
-        print("dict_bestfit", dict_bestfit)
-        print("dict_bestpred", dict_bestpred)
+        print("accuracy:", dict_accuracy)
+        print("ipm_iterations:", dict_ipmiters)
+        print("mean_gmres_iterations:", dict_mean_gmresiters)
+        print("time_fastadj:_setup:", dict_timefastadjsetup)
+        print("best_parameters:", dict_bestparam)
+        print("best_time_fit:", dict_bestfit)
+        print("best_time_predict:", dict_bestpred)
     
         print("\nResults LIBSVM:")
         print("------------------------\n")
-        print("lib_dict_acc:", lib_dict_acc) 
-        print("lib_dict_bestparam", lib_dict_bestparam)
-        print("lib_dict_bestfit", lib_dict_bestfit)
-        print("lib_dict_bestpred", lib_dict_bestpred)
+        print("lib_accuracy:", lib_dict_accuracy) 
+        print("lib_best_parameters:", lib_dict_bestparam)
+        print("lib_best_time_fit:", lib_dict_bestfit)
+        print("lib_best_time_predict:", lib_dict_bestpred)
         
 ####################
 

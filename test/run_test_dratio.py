@@ -19,7 +19,7 @@ from nfftsvmipm.class_NFFTSVMipm import RandomSearch
 import argparse
 
 # Create the argument parser
-parser = argparse.ArgumentParser(description="Run test on IPM/GMRES convergence tolerance with configurable parameters.")
+parser = argparse.ArgumentParser(description="Run test on dimensionality reduction ratio with configurable parameters.")
 
 # Add arguments
 parser.add_argument('--kernel', type=int, default=1, choices=[1, 3], 
@@ -106,15 +106,15 @@ sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results
-dict_acc = {d: [] for d in data_sets}
+dict_accuracy = {d: [] for d in data_sets}
 dict_ipmiters = {d: [] for d in data_sets}
-dict_gmresiters = {d: [] for d in data_sets}
+dict_mean_gmresiters = {d: [] for d in data_sets}
 dict_bestparam = {d: [] for d in data_sets}
 dict_bestfit = {d: [] for d in data_sets}
 dict_bestpred = {d: [] for d in data_sets}
 
 # initialize dict for LIBSVM results
-lib_dict_acc = {d: [] for d in data_sets}
+lib_dict_accuracy = {d: [] for d in data_sets}
 lib_dict_bestparam = {d: [] for d in data_sets}
 lib_dict_bestfit = {d: [] for d in data_sets}
 lib_dict_bestpred = {d: [] for d in data_sets}
@@ -172,9 +172,9 @@ for data in data_sets:
         ub_C = 0.7
 
         # define auxiliary lists for saving results for d_ratio candidates
-        acc = []
+        accuracy = []
         ipmiters = []
-        gmresiters = []
+        mean_gmresiters = []
         bestparam = []
         bestfit = []
         bestpred = []
@@ -206,29 +206,29 @@ for data in data_sets:
             print("Best GMRESiter:", results_ipm[7])
 	    
             # save results for d_ratio candidate
-            acc.append((results_ipm[1])[0])
+            accuracy.append((results_ipm[1])[0])
             ipmiters.append(results_ipm[9])
-            gmresiters.append(np.mean(results_ipm[7]))
+            mean_gmresiters.append(np.mean(results_ipm[7]))
             bestparam.append(results_ipm[0])
             bestfit.append(results_ipm[2])
             bestpred.append(results_ipm[3])
         
 	    # save values to dict
-        dict_acc[data].append(acc)
+        dict_accuracy[data].append(accuracy)
         dict_ipmiters[data].append(ipmiters)
-        dict_gmresiters[data].append(gmresiters)
+        dict_mean_gmresiters[data].append(mean_gmresiters)
         dict_bestparam[data].append(bestparam)
         dict_bestfit[data].append(bestfit)
         dict_bestpred[data].append(bestpred)
         
         print("\nResults NFFTSVMipm:")
         print("------------------------\n")
-        print("dict_acc:", dict_acc)
-        print("dict_ipmiters:", dict_ipmiters)
-        print("dict_gmresiters:", dict_gmresiters)
-        print("dict_bestparam", dict_bestparam)
-        print("dict_bestfit", dict_bestfit)
-        print("dict_bestpred", dict_bestpred)
+        print("accuracy:", dict_accuracy)
+        print("ipm_iterations:", dict_ipmiters)
+        print("mean_gmres_iterations:", dict_mean_gmresiters)
+        print("best_parameters:", dict_bestparam)
+        print("best_time_fit:", dict_bestfit)
+        print("best_time_predict:", dict_bestpred)
 #################################################################################
 	
 	    ## RandomSearch for LIBSVM
@@ -257,7 +257,7 @@ for data in data_sets:
         print("Mean Total Runtime:", results_libsvm[4] + results_libsvm[5])
 
 	    # save values to dict
-        lib_dict_acc[data].append((results_libsvm[1])[0])
+        lib_dict_accuracy[data].append((results_libsvm[1])[0])
         lib_dict_bestparam[data].append(results_libsvm[0])
         lib_dict_bestfit[data].append(results_libsvm[2])
         lib_dict_bestpred[data].append(results_libsvm[3])
@@ -268,19 +268,19 @@ for data in data_sets:
     
         print("\nResults NFFTSVMipm:")
         print("------------------------\n")
-        print("dict_acc:", dict_acc)
-        print("dict_ipmiters:", dict_ipmiters)
-        print("dict_gmresiters:", dict_gmresiters)
-        print("dict_bestparam", dict_bestparam)
-        print("dict_bestfit", dict_bestfit)
-        print("dict_bestpred", dict_bestpred)
+        print("accuracy:", dict_accuracy)
+        print("ipm_iterations:", dict_ipmiters)
+        print("mean_gmres_iterations:", dict_mean_gmresiters)
+        print("best_parameters:", dict_bestparam)
+        print("best_time_fit:", dict_bestfit)
+        print("best_time_predict:", dict_bestpred)
     
         print("\nResults LIBSVM:")
         print("------------------------\n")
-        print("lib_dict_acc:", lib_dict_acc)
-        print("lib_dict_bestparam", lib_dict_bestparam)
-        print("lib_dict_bestfit", lib_dict_bestfit)
-        print("lib_dict_bestpred", lib_dict_bestpred)
+        print("lib_accuracy:", lib_dict_accuracy)
+        print("lib_best_parameters:", lib_dict_bestparam)
+        print("lib_best_time_fit:", lib_dict_bestfit)
+        print("lib_best_time_predict:", lib_dict_bestpred)
         
 ####################
 

@@ -73,10 +73,10 @@ sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results
-dict_cholgr = {r: [] for r in rank_list}
-dict_cholrp = {r: [] for r in rank_list}
+dict_cholesky_greedy = {r: [] for r in rank_list}
+dict_cholesky_rp = {r: [] for r in rank_list}
 dict_rff = {r: [] for r in rank_list}
-dict_nystr = {r: [] for r in rank_list}
+dict_nystrom = {r: [] for r in rank_list}
 
 ####################
 
@@ -114,13 +114,13 @@ for n in Ndata:
             
             # save values to dict
             if prec == "chol_greedy":
-                dict_cholgr[D_prec].append(precond_time)
+                dict_cholesky_greedy[D_prec].append(precond_time)
             elif prec == "chol_rp":
-                dict_cholrp[D_prec].append(precond_time)
+                dict_cholesky_rp[D_prec].append(precond_time)
             elif prec == "rff":
                 dict_rff[D_prec].append(precond_time)
             elif prec == "nystrom":
-                dict_nystr[D_prec].append(precond_time)
+                dict_nystrom[D_prec].append(precond_time)
                
             print("###############################################################")
         
@@ -135,10 +135,10 @@ for n in Ndata:
         
             print("\nResults Precond Timings:")
             print("------------------------\n")
-            print("dict_cholgr:", dict_cholgr)
-            print("dict_cholrp:", dict_cholrp)
-            print("dict_rff:", dict_rff)
-            print("dict_nystr:", dict_nystr)
+            print("cholesky_greedy:", dict_cholesky_greedy)
+            print("cholesky_rp:", dict_cholesky_rp)
+            print("rff:", dict_rff)
+            print("nystrom:", dict_nystrom)
 
 ####################
 

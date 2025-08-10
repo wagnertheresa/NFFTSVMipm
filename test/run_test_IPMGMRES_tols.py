@@ -106,9 +106,9 @@ sys.path.insert(0, nfftsvmipm_dir)
 
 ####################
 # initialize dict for results
-dict_acc = {t[0]: [] for t in tol_list}
+dict_accuracy = {t[0]: [] for t in tol_list}
 dict_ipmiters = {t[0]: [] for t in tol_list}
-dict_gmresiters = {t[0]: [] for t in tol_list}
+dict_mean_gmresiters = {t[0]: [] for t in tol_list}
 dict_bestparam = {t[0]: [] for t in tol_list}
 dict_bestfit = {t[0]: [] for t in tol_list}
 dict_bestpred = {t[0]: [] for t in tol_list}
@@ -195,9 +195,9 @@ for n in Ndata:
         print("Best GMRESiter:", results_ipm[7])
         
 	    # save values to dict
-        dict_acc[t[0]].append((results_ipm[1])[0])
+        dict_accuracy[t[0]].append((results_ipm[1])[0])
         dict_ipmiters[t[0]].append(results_ipm[9])
-        dict_gmresiters[t[0]].append(np.mean(results_ipm[7]))
+        dict_mean_gmresiters[t[0]].append(np.mean(results_ipm[7]))
         dict_bestparam[t[0]].append(results_ipm[0])
         dict_bestfit[t[0]].append(results_ipm[2])
         dict_bestpred[t[0]].append(results_ipm[3])
@@ -208,12 +208,12 @@ for n in Ndata:
         print("\n########################################################################")
         print("\nResults NFFTSVMipm:")
         print("------------------------\n")
-        print("dict_acc:", dict_acc)
-        print("dict_ipmiters:", dict_ipmiters)
-        print("dict_gmresiters:", dict_gmresiters)
-        print("dict_bestparam", dict_bestparam)
-        print("dict_bestfit", dict_bestfit)
-        print("dict_bestpred", dict_bestpred)
+        print("accuracy:", dict_accuracy)
+        print("ipm_iterations:", dict_ipmiters)
+        print("mean_gmres_iterations:", dict_mean_gmresiters)
+        print("best_parameters:", dict_bestparam)
+        print("best_time_fit:", dict_bestfit)
+        print("best_time_predict:", dict_bestpred)
 
 ####################
 
