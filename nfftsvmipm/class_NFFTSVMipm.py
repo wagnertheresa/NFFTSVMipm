@@ -14,6 +14,8 @@ import random
 import time
 import scipy
 
+random.seed(42)
+
 import fastadj2
 
 from sklearn.feature_selection import mutual_info_classif
