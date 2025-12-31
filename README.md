@@ -17,6 +17,8 @@ The main file class_NFFTSVMipm.py in the `nfftsvmipm` directory consists of the 
 
 - `NFFTSVMipm` performs a preconditioned interior point method for Support Vector Machines.
 - `RandomSearch` searches on random candidate parameter values for one of the classifiers `NFFTSVMipm` or `LIBSVM`.
+-  A random seed is set as `random.seed(42)` in the class file `class_NFFTSVMipm.py` `
+
 
 To reproduce the results presented in the paper, execute the following files from the `test` directory:
 
