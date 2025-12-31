@@ -15,7 +15,7 @@ import time
 import scipy
 
 # Add random seed for reproducibility
-random.seed(1)
+random.seed(42)
 
 import fastadj2
 
