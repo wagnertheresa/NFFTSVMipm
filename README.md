@@ -19,6 +19,7 @@ The main file class_NFFTSVMipm.py in the `nfftsvmipm` directory consists of the 
 - `RandomSearch` searches on random candidate parameter values for one of the classifiers `NFFTSVMipm` or `LIBSVM`.
 -  A random seed is set as `random.seed(1)` in the class file `class_NFFTSVMipm.py` `
 
+We do not expect different results when running the codes on different CPU hardware. The code was always tested using double precision and we do not recommend to use the code with a reduced precision as it has not been tested there. By setting the random seed we allow for reproducibility on the user's hardware. We describe now how to obtain the results of the paper.
 
 To reproduce the results presented in the paper, execute the following files from the `test` directory:
 
