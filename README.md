@@ -40,6 +40,9 @@ To run the scripts individually, use the following command:
 python test/filename.py [options]
 ```
 
+Note that we call SciPy `gmres` function which requires the specification of `rtol` since release `SciPy 1.14.0` see the release notes. For older versions of SciPy please replace `rtol` by 'tol'.
+
+
 ### `run_test_precond_timings.py`
 
 For a given list of subset sizes for a list of data sets, the script iterates over different preconditioners and preconditioner ranks for given feature windows, length-scales and margin value.
