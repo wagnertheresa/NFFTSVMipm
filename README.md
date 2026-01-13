@@ -3,8 +3,7 @@ This repository contains an implementation of the method introduced in the paper
 
 We propose employing a NFFT-accelerated matrix-vector product using an ANOVA decomposition for the feature space within a preconditioned interior point method for support vector machines. For more details, see the above-mentioned paper.
 
-This package uses the [FastAdjacency2.0](https://github.com/wagnertheresa/FastAdjacency2.0) package to perform NFFT-based fast summation to speed up kernel-vector multiplications for the ANOVA kernel.
-
+Our package uses the [FastAdjacency2.0](https://github.com/wagnertheresa/FastAdjacency2.0) package to perform NFFT-based fast summation to speed up kernel-vector multiplications for the ANOVA kernel. For this one requires the [NFFT](https://github.com/ghisvail/nfft) library, which in turn has a major dependance on the more standard `FFTW` library.
 ## Installation
 
 - This software has been tested with Python 3.8.
