@@ -258,7 +258,8 @@ class NFFTSVMipm:
             Ynu = AQ+nu*G
             QaAQ = G.T @ Ynu
             L = scipy.linalg.cholesky(QaAQ, lower=True)
-            B = scipy.linalg.solve_triangular(L.T, Ynu.T, lower=False).T
+            B = scipy.linalg.solve_triangular(L, Ynu.T, lower=True).T
+            # B = scipy.linalg.solve_triangular(L, Ynu.T,lower=True)
             U, S, Vh = np.linalg.svd(B,full_matrices=False)
             Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)
             dgs=np.diag(Lambda_diag)

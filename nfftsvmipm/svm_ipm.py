@@ -47,7 +47,7 @@ def evaluate_F_Newton(a, b, MATa, ytrain, C, mu):
     """
     n = len(a)
     e = np.ones(n)
-    F1 = MATa - e + b*ytrain - (mu*e)/a + (mu*e)/(C*e-a)
+    F1 = e-MATa + b*ytrain + (mu*e)/a - (mu*e)/(C*e-a)
     F2 = np.dot(ytrain,a)
     
     F = np.hstack((F1,F2))
@@ -222,7 +222,7 @@ def svm_ipm_pd_line_search(KER, ytrain, C, iter_ip, tol, sigma_br, Gmaxiter, Gto
             #print("Norm F_current:", np.linalg.norm(F_current))
             #print("Norm F_updated:", np.linalg.norm(F_updated))
             # Check if constraints are satisfied
-            if (np.linalg.norm(F_updated,ord=np.inf) <= ((1-a_BT*step) * np.linalg.norm(F_current,ord=np.inf))):
+            if (np.linalg.norm(F_updated) <= ((1-a_BT*step) * np.linalg.norm(F_current))):
                 stopCondBackTrack = True
             else:
                 step = b_BT * step

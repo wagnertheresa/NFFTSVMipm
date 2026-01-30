@@ -201,7 +201,7 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
     elif prec == "nystrom":
         k = D_prec
 
-        # setup Nyström decomposition
+        # # setup Nyström decomposition
         ell = k+10
         G = np.random.randn(X_train.shape[0],ell)
         AQ = np.zeros((G.shape))
@@ -211,15 +211,14 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
         Ynu = AQ+nu*G
         QaAQ = G.T @ Ynu
         L = scipy.linalg.cholesky(QaAQ, lower=True)
-        B = scipy.linalg.solve_triangular(L.T, Ynu.T, lower=False).T
+        # B = scipy.linalg.solve_triangular(L.T, Ynu.T,trans=1, lower=False)
+        B = scipy.linalg.solve_triangular(L, Ynu.T, lower=True).T
         U, S, Vh = np.linalg.svd(B,full_matrices=False)
         Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)
         dgs=np.diag(Lambda_diag)
         keep_indices = np.where(dgs/dgs[0] > 1e-3)[0]
         keep_indices = keep_indices[-1]
         Ldec = U[:,:keep_indices]@np.sqrt(Lambda_diag[:keep_indices,:keep_indices])
-
-
     ########################
     
     # stop timing preconditioner setup
