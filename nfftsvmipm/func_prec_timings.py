@@ -190,7 +190,7 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
             # generate D_prec iid samples from Uniform(0,2*pi)
             b = 2*np.pi*np.random.rand(D_prec)
             
-            Zl = np.sqrt(2/D_prec) * np.cos(((X_train[:,windows[l]]).dot(W.conj().T) + b[np.newaxis,:]))
+            Zl = np.sqrt(1/len(self.windows))*np.sqrt(2/D_prec) * np.cos(((X_train[:,windows[l]]).dot(W.conj().T) + b[np.newaxis,:]))
         
             Ldec.append(Zl)
         
@@ -200,18 +200,15 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
     # Nyström decomposition
     elif prec == "nystrom":
         k = D_prec
-
         # # setup Nyström decomposition
-        ell = k+10
-        G = np.random.randn(X_train.shape[0],ell)
+        G = np.random.randn(X_train.shape[0],k)
         AQ = np.zeros((G.shape))
-        for j in range(ell):
+        for j in range(k):
             AQ[:,j] = KER_fast(G[:,j])
         nu = math.sqrt(X_train.shape[0])*1e-2*np.linalg.norm(AQ)
         Ynu = AQ+nu*G
         QaAQ = G.T @ Ynu
         L = scipy.linalg.cholesky(QaAQ, lower=True)
-        # B = scipy.linalg.solve_triangular(L.T, Ynu.T,trans=1, lower=False)
         B = scipy.linalg.solve_triangular(L, Ynu.T, lower=True).T
         U, S, Vh = np.linalg.svd(B,full_matrices=False)
         Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)

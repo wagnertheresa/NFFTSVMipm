@@ -236,7 +236,7 @@ class NFFTSVMipm:
                 # generate D_prec iid samples from Uniform(0,2*pi)
                 b = 2*np.pi*np.random.rand(self.D_prec)
                 
-                Zl = np.sqrt(2/self.D_prec) * np.cos(((X_train[:,self.windows[l]]).dot(W.conj().T) + b[np.newaxis,:]))
+                Zl = np.sqrt(1/len(self.windows))*np.sqrt(2/self.D_prec) * np.cos(((X_train[:,self.windows[l]]).dot(W.conj().T) + b[np.newaxis,:]))
             
                 Ldec.append(Zl)
             
@@ -245,21 +245,17 @@ class NFFTSVMipm:
         ###########################
         # Nyström decomposition
         elif prec == "nystrom":
-            
-
-            # setup Nyström decomposition
-            k = self.D_prec
-            ell = k+10
-            G = np.random.randn(X_train.shape[0],ell)
+            k =  self.D_prec
+            # # setup Nyström decomposition
+            G = np.random.randn(X_train.shape[0],k)
             AQ = np.zeros((G.shape))
-            for j in range(ell):
+            for j in range(k):
                 AQ[:,j] = KER_fast(G[:,j])
             nu = math.sqrt(X_train.shape[0])*1e-2*np.linalg.norm(AQ)
             Ynu = AQ+nu*G
             QaAQ = G.T @ Ynu
             L = scipy.linalg.cholesky(QaAQ, lower=True)
             B = scipy.linalg.solve_triangular(L, Ynu.T, lower=True).T
-            # B = scipy.linalg.solve_triangular(L, Ynu.T,lower=True)
             U, S, Vh = np.linalg.svd(B,full_matrices=False)
             Lambda_diag = np.diag(np.maximum(0, S**2 - nu),k=0)
             dgs=np.diag(Lambda_diag)
