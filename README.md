@@ -9,7 +9,7 @@ Our package uses the [FastAdjacency2.0](https://github.com/wagnertheresa/FastAdj
 - This software has been tested with Python 3.8.
 - This software depends the FastAdjacency2.0 package. We refer to https://github.com/wagnertheresa/FastAdjacency2.0#readme for installation instructions.
 
-To use this code, run `make` from the terminal. Optionally, run `make check` to test your installation.
+To use this code, run `make` from the terminal. Optionally, run `make check` to test your installation. If this throws a warning message an installation via `pip install .` works as well.
 
 ## Usage
 The main file class_NFFTSVMipm.py in the `nfftsvmipm` directory consists of the following two classes:
