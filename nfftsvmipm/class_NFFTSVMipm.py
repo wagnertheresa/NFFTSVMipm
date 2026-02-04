@@ -261,7 +261,9 @@ class NFFTSVMipm:
             dgs=np.diag(Lambda_diag)
             keep_indices = np.where(dgs/dgs[0] > 1e-3)[0]
             keep_indices = keep_indices[-1]
+            keep_indices = keep_indices +1
             Ldec = U[:,:keep_indices]@np.sqrt(Lambda_diag[:keep_indices,:keep_indices])
+
         #######################
 
         # perform interior point method with line search routine for determining step size

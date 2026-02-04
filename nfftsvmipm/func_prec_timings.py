@@ -189,7 +189,6 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
             W = np.sqrt(1/(sigma[l]**2))*np.random.normal(size=(D_prec,(X_train[:,windows[l]]).shape[1]))
             # generate D_prec iid samples from Uniform(0,2*pi)
             b = 2*np.pi*np.random.rand(D_prec)
-            
             Zl = np.sqrt(1/len(self.windows))*np.sqrt(2/D_prec) * np.cos(((X_train[:,windows[l]]).dot(W.conj().T) + b[np.newaxis,:]))
         
             Ldec.append(Zl)
@@ -215,6 +214,7 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
         dgs=np.diag(Lambda_diag)
         keep_indices = np.where(dgs/dgs[0] > 1e-3)[0]
         keep_indices = keep_indices[-1]
+        keep_indices = keep_indices +1
         Ldec = U[:,:keep_indices]@np.sqrt(Lambda_diag[:keep_indices,:keep_indices])
     ########################
     
