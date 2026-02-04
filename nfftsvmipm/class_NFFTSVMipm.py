@@ -230,9 +230,9 @@ class NFFTSVMipm:
                 
                 # generate D_prec iid samples from p(w)
                 if self.indiv_sig == True:
-                    W = np.sqrt(2/(self.sigma[l]**2))*np.random.normal(size=(self.D_prec,(X_train[:,self.windows[l]]).shape[1]))
+                    W = np.sqrt(1/(self.sigma[l]**2))*np.random.normal(size=(self.D_prec,(X_train[:,self.windows[l]]).shape[1]))
                 else:
-                    W = np.sqrt(2/(self.sigma**2))*np.random.normal(size=(self.D_prec,(X_train[:,self.windows[l]]).shape[1]))
+                    W = np.sqrt(1/(self.sigma**2))*np.random.normal(size=(self.D_prec,(X_train[:,self.windows[l]]).shape[1]))
                 # generate D_prec iid samples from Uniform(0,2*pi)
                 b = 2*np.pi*np.random.rand(self.D_prec)
                 

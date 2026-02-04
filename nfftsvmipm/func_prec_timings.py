@@ -186,7 +186,7 @@ def setup_precond(X_train, y_train, prec, D_prec, windows, sigma, weights, kerne
         for l in range(len(windows)):
             
             # generate D_prec iid samples from p(w)
-            W = np.sqrt(2/(sigma[l]**2))*np.random.normal(size=(D_prec,(X_train[:,windows[l]]).shape[1]))
+            W = np.sqrt(1/(sigma[l]**2))*np.random.normal(size=(D_prec,(X_train[:,windows[l]]).shape[1]))
             # generate D_prec iid samples from Uniform(0,2*pi)
             b = 2*np.pi*np.random.rand(D_prec)
             
