@@ -53,15 +53,16 @@ def susy(num=0):
     # Construct the absolute path to the specific file in the data folder
     file_path_susy = os.path.join(data_dir, 'SUSY.csv')
     # read dataset
-    df = pd.read_csv(file_path_susy, header=None)
+    df = pd.read_csv(file_path_susy, header=None, memory_map=False)
     
     X = df.iloc[:,1:]
     y = df.iloc[:,0]
     
-    # convert dataframe to numpy array
-    X = X.to_numpy()
-    y = y.to_numpy()
-    
+    # convert dataframe to numpy array 
+    X = X.to_numpy(copy=True)
+    y = y.to_numpy(copy=True)
+
+
     # reshape y
     y = np.reshape(y, (X.shape[0],))
     
@@ -126,8 +127,8 @@ def higgs(num=0):
     y = df.iloc[:,0]
     
     # convert dataframe to numpy array
-    X = X.to_numpy()
-    y = y.to_numpy()
+    X = X.to_numpy(copy=True)
+    y = y.to_numpy(copy=True)
     
     # reshape y
     y = np.reshape(y, (X.shape[0],))
