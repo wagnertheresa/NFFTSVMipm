@@ -10,7 +10,11 @@ Execute this file to reproduce the results presented in Table 3.
 """
 
 import numpy as np
+import scipy
 
+
+
+from libsvm import svmutil
 from nfftsvmipm.class_NFFTSVMipm import RandomSearch
 
 ##################################################################################
