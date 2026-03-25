@@ -55,7 +55,7 @@ class NFFTSVMipm:
         The weight for the weighted sum of kernels.
     kernel : int, default = 1
         The indicator of the chosen kernel definition.
-        kernel=1 denotes the Gaussiam kernel, kernel=3 the Matérn(1/2) kernel.
+        kernel=1 denotes the Gaussiankernel, kernel=3 the Matérn(1/2) kernel.
     fastadj_setup : str, default="default"
         Defines the desired approximation accuracy of the NFFT fastsum method. It is one of the strings 'fine', 'default' or 'rough'.
         
