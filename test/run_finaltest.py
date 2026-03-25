@@ -235,26 +235,26 @@ for data in data_sets:
         lb_C = 0.1
         ub_C = 0.7
 
-#    	# setup Random Search model for LIBSVM classifier
-#        model = RandomSearch(classifier="LIBSVM", kernel=kernel, lb=[lb_gamma, lb_C], ub=[ub_gamma, ub_C], max_iter_rs=iRS)
-#
-#    	## run classification task
-#        results_libsvm = model.tune(X_train, y_train, X_test, y_test)
-#        print("\nRandomSearch for LIBSVM")
-#        print("Best Parameters:", results_libsvm[0])
-#        print("Best Result:", results_libsvm[1])
-#        print("Best Runtime Fit:", results_libsvm[2])
-#        print("Best Runtime Predict:", results_libsvm[3])
-#        print("Best Total Runtime:", results_libsvm[2] + results_libsvm[3])
-#        print("Mean Runtime Fit:", results_libsvm[4])
-#        print("Mean Runtime Predict:", results_libsvm[5])
-#        print("Mean Total Runtime:", results_libsvm[4] + results_libsvm[5])
+        # setup Random Search model for LIBSVM classifier
+       model = RandomSearch(classifier="LIBSVM", kernel=kernel, lb=[lb_gamma, lb_C], ub=[ub_gamma, ub_C], max_iter_rs=iRS)
 
-#       	# save values to dict
-#        lib_dict_accuracy[data].append((results_libsvm[1])[0])
-#        lib_dict_bestparam[data].append(results_libsvm[0])
-#        lib_dict_bestfit[data].append(results_libsvm[2])
-#        lib_dict_bestpred[data].append(results_libsvm[3])
+       ## run classification task
+       results_libsvm = model.tune(X_train, y_train, X_test, y_test)
+       print("\nRandomSearch for LIBSVM")
+       print("Best Parameters:", results_libsvm[0])
+       print("Best Result:", results_libsvm[1])
+       print("Best Runtime Fit:", results_libsvm[2])
+       print("Best Runtime Predict:", results_libsvm[3])
+       print("Best Total Runtime:", results_libsvm[2] + results_libsvm[3])
+       print("Mean Runtime Fit:", results_libsvm[4])
+       print("Mean Runtime Predict:", results_libsvm[5])
+       print("Mean Total Runtime:", results_libsvm[4] + results_libsvm[5])
+
+      	# save values to dict
+       lib_dict_accuracy[data].append((results_libsvm[1])[0])
+       lib_dict_bestparam[data].append(results_libsvm[0])
+       lib_dict_bestfit[data].append(results_libsvm[2])
+       lib_dict_bestpred[data].append(results_libsvm[3])
         
 #################################################################################
     
@@ -271,12 +271,12 @@ for data in data_sets:
         print("best_time_fit:", dict_bestfit)
         print("best_time_predict:", dict_bestpred)
     
-#        print("\nResults LIBSVM:")
-#        print("------------------------\n")
-#        print("lib_accuracy:", lib_dict_accuracy) 
-#        print("lib_best_parameters:", lib_dict_bestparam)
-#        print("lib_best_time_fit:", lib_dict_bestfit)
-#        print("lib_best_time_predict:", lib_dict_bestpred)
+       print("\nResults LIBSVM:")
+       print("------------------------\n")
+       print("lib_accuracy:", lib_dict_accuracy) 
+       print("lib_best_parameters:", lib_dict_bestparam)
+       print("lib_best_time_fit:", lib_dict_bestfit)
+       print("lib_best_time_predict:", lib_dict_bestpred)
         
 ####################
 
